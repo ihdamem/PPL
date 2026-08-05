@@ -17,8 +17,8 @@ set -euo pipefail
 #   REMOTE_DIR                  default: /opt/si-ruangan
 # -----------------------------------------------------------------------------
 
-SSH_HOST="${SSH_HOST:-sshd.meansrev.tech}"
-SSH_USER="${SSH_USER:-webserver-2}"
+SSH_HOST="$(echo -n "${SSH_HOST:-sshd.meansrev.tech}" | tr -d '[:space:]')"
+SSH_USER="$(echo -n "${SSH_USER:-webserver-2}" | tr -d '[:space:]')"
 SSH_PASSWORD="${SSH_PASSWORD:-}"
 CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID:-}"
 CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET:-}"
@@ -46,6 +46,13 @@ fi
 # -----------------------------------------------------------------------------
 # Sync deployable files to the server, then run docker compose.
 # -----------------------------------------------------------------------------
+
+# Convert wrapper to absolute path so rsync can use it reliably.
+SSH_WRAPPER="$(cd "$SCRIPT_DIR" && pwd)/ssh-cloudflared.sh"
+
+echo "==> Sanity check: SSH connection to ${SSH_HOST} ..."
+"$SSH_WRAPPER" "${SSH_USER}@${SSH_HOST}" 'whoami && echo "SSH OK"'
+
 echo "==> Syncing files to ${SSH_USER}@${SSH_HOST}:${REMOTE_DIR} ..."
 rsync -avz --delete \
   -e "$SSH_WRAPPER" \
