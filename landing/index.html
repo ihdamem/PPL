@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="SiRuangan — Sistem Peminjaman Ruangan Kampus UGM. Cari, ajukan, dan pantau peminjaman ruangan kampus dengan mudah." />
+  <title>SiRuangan — Sistem Peminjaman Ruangan Kampus UGM</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <header class="site-header" id="beranda">
+    <div class="container header-inner">
+      <a href="#beranda" class="logo" aria-label="SiRuangan">
+        <span class="logo-mark">SR</span>
+        <span class="logo-text">SiRuangan</span>
+      </a>
+      <nav class="main-nav" id="mainNav" aria-label="Navigasi utama">
+        <a href="#fitur">Fitur</a>
+        <a href="#alur">Alur</a>
+        <a href="#peran">Peran</a>
+        <a href="#tim">Tim</a>
+        <a href="#deploy">Deploy</a>
+      </nav>
+      <button class="nav-toggle" id="navToggle" aria-expanded="false" aria-controls="mainNav" aria-label="Buka menu">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-inner">
+        <div class="hero-content">
+          <p class="eyebrow">Pengembangan Perangkat Lunak — UGM</p>
+          <h1>Sistem Peminjaman Ruangan Kampus UGM</h1>
+          <p class="lead">
+            Cari ruangan sesuai kapasitas &amp; fasilitas, ajukan peminjaman, pantau status, dan dapatkan notifikasi secara real-time — semua dalam satu portal.
+          </p>
+          <div class="hero-actions">
+            <a href="#" class="btn btn-primary">Ajukan Peminjaman</a>
+            <a href="#" class="btn btn-secondary">Lihat Ketersediaan Ruangan</a>
+          </div>
+          <p class="hero-note">
+            <span class="badge">SSO UGM</span>
+            <span class="badge">Konflik Otomatis</span>
+            <span class="badge">Audit Log</span>
+          </p>
+        </div>
+        <div class="hero-visual" aria-hidden="true">
+          <div class="card-stack">
+            <div class="mini-card">
+              <strong>Ruang Rapat Lt. 2</strong>
+              <span class="pill pill-success">Tersedia</span>
+              <small>08:00–10:00</small>
+            </div>
+            <div class="mini-card">
+              <strong>Aula Utama</strong>
+              <span class="pill pill-warn">Pending</span>
+              <small>Menunggu persetujuan</small>
+            </div>
+            <div class="mini-card">
+              <strong>Laboratorium A</strong>
+              <span class="pill pill-danger">Penuh</span>
+              <small>10:00–12:00</small>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="fitur">
+      <div class="container">
+        <div class="section-header">
+          <h2>Fitur Utama</h2>
+          <p>Dirancang untuk memenuhi kebutuhan operasional peminjaman ruangan di lingkungan kampus UGM.</p>
+        </div>
+        <div class="feature-grid">
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🔐</div>
+            <h3>Autentikasi SSO UGM</h3>
+            <p>Masuk menggunakan akun institusi UGM. Setiap peran mendapatkan hak akses yang sesuai.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">🏢</div>
+            <h3>Manajemen Ruangan</h3>
+            <p>Kelola data ruangan, kapasitas, lokasi, fasilitas, dan status ketersediaan secara real-time.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📝</div>
+            <h3>Booking Online</h3>
+            <p>Ajukan peminjaman dengan formulir lengkap, termasuk upload surat permohonan PDF hingga 5 MB.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">⚡</div>
+            <h3>Deteksi Konflik Otomatis</h3>
+            <p>Sistem memeriksa tabrakan jadwal saat pengajuan dan menampilkan alternatif jika ruangan penuh.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">✅</div>
+            <h3>Approval Workflow</h3>
+            <p>Approver dapat menyetujui, menolak, atau meminta revisi dengan alasan yang tercatat.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📧</div>
+            <h3>Notifikasi Email</h3>
+            <p>Pemohon dan approver mendapat pemberitahuan setiap kali status booking berubah.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📊</div>
+            <h3>Dashboard Admin</h3>
+            <p>Pantau jadwal, statistik penggunaan ruangan, dan kelola pengguna dari satu dashboard.</p>
+          </article>
+          <article class="feature-card">
+            <div class="feature-icon" aria-hidden="true">📜</div>
+            <h3>Audit Log</h3>
+            <p>Setiap aksi tercatat rinci: siapa, kapan, perubahan nilai lama &amp; nilai baru.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="alur">
+      <div class="container">
+        <div class="section-header">
+          <h2>Alur Peminjaman</h2>
+          <p>Proses yang sederhana, transparan, dan dapat dipertanggungjawabkan.</p>
+        </div>
+        <div class="steps">
+          <div class="step">
+            <div class="step-number">1</div>
+            <h3>Login SSO</h3>
+            <p>Masuk menggunakan akun UGM. Sistem mengenali peran sebagai user, approver, atau admin.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">2</div>
+            <h3>Cari Ruangan</h3>
+            <p>Filter berdasarkan kapasitas, lokasi, fasilitas, dan slot waktu yang tersedia.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">3</div>
+            <h3>Ajukan Booking</h3>
+            <p>Isi formulir dan upload surat permohonan. Sistem otomatis mendeteksi konflik jadwal.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">4</div>
+            <h3>Approval</h3>
+            <p>Approver meninjau detail booking dan memutuskan menyetujui atau menolak beserta alasannya.</p>
+          </div>
+          <div class="step">
+            <div class="step-number">5</div>
+            <h3>Penggunaan &amp; Riwayat</h3>
+            <p>Setelah disetujui, ruangan dapat digunakan. Status &amp; riwayat tersimpan dalam audit log.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="peran">
+      <div class="container">
+        <div class="section-header">
+          <h2>Peran Pengguna</h2>
+          <p>Sistem membedakan hak akses berdasarkan peran untuk menjaga keamanan dan kewenangan.</p>
+        </div>
+        <div class="role-grid">
+          <div class="role-card">
+            <h3>User / Pemohon</h3>
+            <p>Mencari ruangan, mengajukan booking, membatalkan booking, serta melihat status &amp; riwayat peminjaman.</p>
+          </div>
+          <div class="role-card">
+            <h3>Approver</h3>
+            <p>Meninjau permohonan, menyetujui/menolak booking, dan melihat ringkasan konflik &amp; rekomendasi.</p>
+          </div>
+          <div class="role-card">
+            <h3>Admin</h3>
+            <p>Mengelola ruangan &amp; fasilitas, menandai maintenance, melihat dashboard, dan memantau audit log.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-alt" id="deploy">
+      <div class="container">
+        <div class="section-header">
+          <h2>Deploy &amp; Integrasi</h2>
+          <p>Dibangun untuk dapat di-deploy dengan mudah oleh tim menggunakan Docker Compose dan CI/CD.</p>
+        </div>
+        <div class="deploy-grid">
+          <div class="deploy-card">
+            <h3>Docker Compose</h3>
+            <p>Salin file dan jalankan <code>docker compose up -d --build</code>. Aplikasi berjalan di port <strong>8085</strong>.</p>
+          </div>
+          <div class="deploy-card">
+            <h3>Cloudflare Tunnel</h3>
+            <p>Akses SSH dan publik ke server dilindungi Cloudflare Access. Tidak perlu membuka port SSH ke internet.</p>
+          </div>
+          <div class="deploy-card">
+            <h3>GitHub Actions</h3>
+            <p>Push ke <code>main</code> otomatis membangun image dan mendeploy ke server via tunnel.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="tim">
+      <div class="container">
+        <div class="section-header">
+          <h2>Tim Pengembang</h2>
+          <p>Mahasiswa Departemen Ilmu Komputer dan Elektronika, FMIPA UGM.</p>
+        </div>
+        <div class="team-grid">
+          <div class="team-card">
+            <div class="team-avatar" aria-hidden="true">AI</div>
+            <h3>Aldi Indrawan</h3>
+            <p>25/557923/PPA/07038</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" aria-hidden="true">DI</div>
+            <h3>Dimas Ihdam Maulana</h3>
+            <p>25/562999/PPA/07090</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" aria-hidden="true">HR</div>
+            <h3>Hanan Fakhira Rima Wibowo</h3>
+            <p>25/564467/PPA/07122</p>
+          </div>
+          <div class="team-card">
+            <div class="team-avatar" aria-hidden="true">PA</div>
+            <h3>Prima Adi Pradana</h3>
+            <p>25/568512/PPA/07150</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="cta-section">
+      <div class="container cta-inner">
+        <h2>Siap meminjam ruangan kampus?</h2>
+        <p>Portal akan tersedia setelah implementasi autentikasi SSO dan modul booking selesai.</p>
+        <a href="#" class="btn btn-primary">Masuk Portal</a>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-inner">
+      <p>&copy; 2026 SiRuangan — Sistem Peminjaman Ruangan Kampus UGM.</p>
+      <p>Departemen Ilmu Komputer dan Elektronika, Fakultas Matematika dan Ilmu Pengetahuan Alam, Universitas Gadjah Mada, Yogyakarta.</p>
+    </div>
+  </footer>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

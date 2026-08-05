@@ -24,13 +24,20 @@ Sistem ini dirancang untuk mempermudah proses peminjaman ruangan di lingkungan k
 
 ```
 PPL/
+├── landing/            # Halaman landing page statis (HTML/CSS/JS)
+├── deploy/             # Panduan deployment untuk tim
+├── scripts/            # Skrip deploy manual via Cloudflare tunnel
+├── .github/workflows/  # GitHub Actions CI/CD
+├── Dockerfile          # Image nginx untuk melayani landing page
+├── nginx.conf          # Konfigurasi web server nginx
+├── docker-compose.yml  # Orkestrasi container, menerbitkan port 8085
 ├── initial-plan.md     # Dokumen rencana dan desain awal
 ├── img/                # Diagram dan gambar dari initial-plan.md
 ├── README.md           # Ringkasan proyek ini
 └── .gitignore          # Daftar file/folder yang diabaikan Git
 ```
 
-Struktur implementasi (frontend, backend, database, dsb.) akan ditambahkan seiring berjalannya pengembangan.
+Struktur implementasi (backend, database, dsb.) akan ditambahkan pada fase pengembangan berikutnya.
 
 ---
 
@@ -45,6 +52,41 @@ Struktur implementasi (frontend, backend, database, dsb.) akan ditambahkan seiri
 
 ---
 
-## 📎 Dokumen
+## CI/CD Deployment
 
-- [`initial-plan.md`](initial-plan.md) — dokumen lengkap: functional requirements, product design hierarchy, dan desain UML.
+Repositori ini menyertakan pipeline GitHub Actions untuk *push-to-deploy* dan skrip deploy lokal.
+
+### Push to Deploy (GitHub Actions)
+
+Setiap push ke branch `main` akan:
+
+1. Membangun image Docker dari `Dockerfile`.
+2. Menyinkronkan file ke server `sshd.meansrev.tech` melalui tunnel Cloudflare Access.
+3. Menjalankan `docker compose up -d --build` di direktori `/opt/si-ruangan`.
+4. Melakukan health check ke `http://localhost:8085/health`.
+
+Konfigurasi yang diperlukan di **Settings > Secrets and variables > Actions** repositori GitHub:
+
+| Secret | Keterangan |
+|--------|------------|
+| `SSH_HOST` | `sshd.meansrev.tech` |
+| `SSH_USER` | user SSH di server, contoh: `webserver-2` |
+| `SSH_PASSWORD` | password SSH user tersebut |
+| `CF_ACCESS_CLIENT_ID` | Cloudflare Access service token ID (agar cloudflared tidak perlu login interaktif) |
+| `CF_ACCESS_CLIENT_SECRET` | Cloudflare Access service token secret |
+
+### Deploy Manual dari Lokal
+
+Jika ingin deploy dari laptop:
+
+```bash
+export SSH_USER="webserver-2"
+export SSH_PASSWORD="dimasganteng"
+export CF_ACCESS_CLIENT_ID="..."
+export CF_ACCESS_CLIENT_SECRET="..."
+./scripts/deploy.sh
+```
+
+Setelah berhasil, aplikasi landing page dapat diakses di server pada port `8085`. Lihat `deploy/README.md` untuk detail lebih lanjut.
+
+---

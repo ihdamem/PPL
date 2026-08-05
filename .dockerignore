@@ -1,0 +1,13 @@
+.git
+.github
+.gitignore
+.venv
+__pycache__
+*.pyc
+.DS_Store
+extract_pdf.py
+img/
+*.md
+README.md
+deploy/
+scripts/

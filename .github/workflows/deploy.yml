@@ -1,0 +1,91 @@
+name: Deploy SiRuangan
+
+# Deploys the landing page (and later the full app) to the team server.
+# Server: sshd.meansrev.tech (behind Cloudflare Access tunnel)
+# SSH user known for this project: webserver-2  (configure via SSH_USER secret)
+# App port on the server: 8085
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  SSH_HOST: ${{ secrets.SSH_HOST }}
+  SSH_USER: ${{ secrets.SSH_USER }}
+  SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
+  CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
+  CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
+  REMOTE_DIR: /opt/si-ruangan
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install cloudflared
+        run: |
+          set -euo pipefail
+          curl -fsSL -o /tmp/cloudflared \
+            "https://github.com/cloudflare/cloudflared/releases/latest/download/cloudflared-linux-amd64"
+          chmod +x /tmp/cloudflared
+          sudo mv /tmp/cloudflared /usr/local/bin/cloudflared
+          cloudflared --version
+
+      - name: Install sshpass
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y sshpass
+
+      - name: Create SSH wrapper
+        run: |
+          set -euo pipefail
+          mkdir -p "$HOME/.ssh-bin"
+          cat > "$HOME/.ssh-bin/ssh-via-cloudflared" <<'EOF'
+          #!/usr/bin/env bash
+          set -euo pipefail
+          host="${1:-}"
+          shift || true
+          export CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID:-}"
+          export CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET:-}"
+          sshpass -p "${SSH_PASSWORD}" ssh \
+            -o StrictHostKeyChecking=accept-new \
+            -o ProxyCommand="cloudflared access ssh --hostname %h" \
+            "$host" "$@"
+          EOF
+          chmod +x "$HOME/.ssh-bin/ssh-via-cloudflared"
+          echo "$HOME/.ssh-bin" >> "$GITHUB_PATH"
+
+      - name: Deploy to server via Cloudflare tunnel
+        run: |
+          set -euo pipefail
+          echo "==> Syncing repository files to server..."
+          rsync -avz --delete \
+            -e "ssh-via-cloudflared" \
+            --exclude='.git' \
+            --exclude='.github' \
+            --exclude='.venv' \
+            --exclude='__pycache__' \
+            --exclude='img' \
+            --exclude='extract_pdf.py' \
+            --exclude='*.md' \
+            --exclude='README.md' \
+            --exclude='deploy' \
+            --exclude='scripts' \
+            ./ "${SSH_USER}@${SSH_HOST}:${REMOTE_DIR}/"
+
+          echo "==> Running docker compose up -d --build..."
+          ssh-via-cloudflared "${SSH_USER}@${SSH_HOST}" \
+            "cd ${REMOTE_DIR} && docker compose up -d --build && docker compose ps"
+
+      - name: Health check
+        run: |
+          set -euo pipefail
+          echo "==> Running health check on http://localhost:8085..."
+          ssh-via-cloudflared "${SSH_USER}@${SSH_HOST}" \
+            "curl -sf --max-time 10 http://localhost:8085/health || (echo 'Health check failed' && exit 1)"
+          echo "==> Health check passed."
