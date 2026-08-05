@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Building2, ClipboardList, User } from "lucide-react";
+import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft } from "lucide-react";
 
 type User = {
   email: string;
@@ -50,7 +50,7 @@ export default function DashboardPage() {
         setLoading(false);
       })
       .catch(() => {
-        router.replace("/login");
+        router.replace("/");
       });
   }, [router]);
 
@@ -59,65 +59,80 @@ export default function DashboardPage() {
       method: "POST",
       credentials: "include",
     });
-    router.push("/login");
+    router.push("/");
   };
 
   if (loading || !user) {
     return (
-      <main className="flex min-h-screen items-center justify-center">
-        <p className="text-muted-foreground">Memuat dashboard…</p>
+      <main className="flex min-h-screen items-center justify-center bg-ugm-dark text-white">
+        <p className="text-slate-300">Memuat dashboard…</p>
       </main>
     );
   }
 
   return (
-    <main className="min-h-screen bg-background p-6">
-      <div className="mx-auto max-w-4xl space-y-8">
-        {/* Header */}
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground">
-              Selamat datang di portal peminjaman ruangan kampus UGM.
-            </p>
-          </div>
+    <main className="min-h-screen bg-slate-50">
+      {/* Header */}
+      <header className="sticky top-0 z-50 border-b border-white/10 bg-ugm-dark/95 backdrop-blur">
+        <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
+          <Link href="/" className="flex items-center gap-2 text-white">
+            <span className="grid h-8 w-8 place-items-center rounded-lg bg-ugm-yellow font-extrabold text-ugm-dark">
+              SR
+            </span>
+            <span className="text-lg font-extrabold tracking-tight">SiRuangan</span>
+          </Link>
           <div className="flex items-center gap-3">
-            <Button variant="outline" asChild>
-              <Link href="/">Beranda Portal</Link>
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+            >
+              <a href="/">
+                <ArrowLeft className="mr-1 size-4" />
+                Landing Page
+              </a>
             </Button>
-            <Button variant="secondary" onClick={handleLogout}>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={handleLogout}
+              className="bg-ugm-yellow text-ugm-dark hover:bg-[#ffe066]"
+            >
               <LogOut className="mr-2 size-4" />
               Keluar
             </Button>
           </div>
         </div>
+      </header>
 
-        {/* User card */}
-        <div className="rounded-xl border bg-card p-6 shadow-sm">
+      <div className="mx-auto max-w-6xl px-6 py-10">
+        {/* Welcome banner */}
+        <div className="mb-8 rounded-2xl bg-gradient-to-br from-ugm-dark to-[#2a2a2a] p-8 text-white shadow-lg">
           <div className="flex items-center gap-4">
-            <div className="flex size-14 items-center justify-center rounded-full bg-primary/10">
-              <User className="size-7 text-primary" />
+            <div className="grid h-16 w-16 place-items-center rounded-full bg-ugm-yellow text-ugm-dark">
+              <User className="size-8" />
             </div>
             <div>
-              <h2 className="text-xl font-semibold">{user.name || user.email}</h2>
-              <p className="text-sm text-muted-foreground">{user.email}</p>
+              <h1 className="text-2xl font-bold md:text-3xl">Selamat datang, {user.name || user.email}</h1>
+              <p className="text-slate-300">{user.email}</p>
             </div>
           </div>
         </div>
 
         {/* Menu grid */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {menuItems.map((item) => (
             <Link
               key={item.title}
               href={item.href}
-              className="group rounded-xl border bg-card p-6 shadow-sm transition-colors hover:bg-accent"
+              className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-ugm-blue/30 hover:shadow-md"
             >
-              <div className="mb-4 flex size-10 items-center justify-center rounded-lg bg-primary/10 text-primary">
+              <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-ugm-blue text-white">
                 <item.icon className="size-5" />
               </div>
-              <h3 className="font-semibold">{item.title}</h3>
-              <p className="text-sm text-muted-foreground">{item.desc}</p>
+              <h3 className="text-lg font-semibold text-ugm-dark">{item.title}</h3>
+              <p className="text-sm text-slate-500">{item.desc}</p>
             </Link>
           ))}
         </div>

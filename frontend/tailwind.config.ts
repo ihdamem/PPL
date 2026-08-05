@@ -43,6 +43,10 @@ const config: Config = {
           DEFAULT: "hsl(var(--card))",
           foreground: "hsl(var(--card-foreground))",
         },
+        "ugm-yellow": "hsl(var(--ugm-yellow))",
+        "ugm-dark": "hsl(var(--ugm-dark))",
+        "ugm-blue": "hsl(var(--ugm-blue))",
+        "ugm-blue-dark": "hsl(var(--ugm-blue-dark))",
       },
       borderRadius: {
         lg: "var(--radius)",
