@@ -4,15 +4,17 @@ Panduan singkat untuk menjalankan landing page / aplikasi SiRuangan di server ti
 
 ## Prasyarat Server
 
-1. Docker dan Docker Compose sudah terpasang.
-2. `cloudflared` sudah terpasang di server untuk tunnel SSH / publik.
-3. Cloudflare Tunnel sudah diarahkan ke port `8085` di server.
+1. Docker dan Docker Compose sudang terpasang.
+2. `cloudflared` sudang terpasang di server untuk tunnel SSH / publik.
+3. Cloudflare Tunnel sudang diarahkan ke port `8085` di server.
 4. (Opsional untuk CI/CD) GitHub Actions runner dapat mengakses server via SSH melalui Cloudflare Access.
 
 ## Struktur File yang Dideploy
 
+Default deploy ke home directory user `webserver-2` karena user tidak punya akses ke `/opt`:
+
 ```
-/opt/si-ruangan
+~/si-ruangan
 ├── Dockerfile
 ├── docker-compose.yml
 ├── nginx.conf
@@ -25,7 +27,7 @@ Panduan singkat untuk menjalankan landing page / aplikasi SiRuangan di server ti
 ## Menjalankan Aplikasi
 
 ```bash
-cd /opt/si-ruangan
+cd ~/si-ruangan
 docker compose up -d --build
 ```
 
@@ -47,7 +49,7 @@ curl -sf http://localhost:8085/health
 Jika melakukan deploy manual:
 
 ```bash
-cd /opt/si-ruangan
+cd ~/si-ruangan
 git pull origin main   # jika repo di-clone di server
 docker compose up -d --build
 docker compose ps
@@ -64,6 +66,7 @@ Jika menggunakan GitHub Actions, cukup push ke branch `main`. Pipeline akan otom
 
 ## Troubleshooting
 
+- **Akses denied ke `/opt`**: default deploy sekarang menggunakan `~/si-ruangan` (home directory user `webserver-2`). Jangan pakai `/opt`.
 - **Port 8085 tidak bisa diakses**: periksa firewall server dan pastikan Cloudflare Tunnel mengarah ke `http://localhost:8085`.
 - **Container tidak start**: jalankan `docker compose logs web` untuk melihat pesan error nginx.
 - **File landing tidak muncul**: pastikan folder `landing/` ikut tersalin saat deploy (rsync atau `git pull` berhasil).

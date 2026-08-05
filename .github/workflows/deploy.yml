@@ -17,7 +17,7 @@ env:
   SSH_PASSWORD: ${{ secrets.SSH_PASSWORD }}
   CF_ACCESS_CLIENT_ID: ${{ secrets.CF_ACCESS_CLIENT_ID }}
   CF_ACCESS_CLIENT_SECRET: ${{ secrets.CF_ACCESS_CLIENT_SECRET }}
-  REMOTE_DIR: /opt/si-ruangan
+  REMOTE_DIR: ~/si-ruangan
 
 jobs:
   deploy:

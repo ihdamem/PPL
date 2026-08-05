@@ -62,7 +62,7 @@ Setiap push ke branch `main` akan:
 
 1. Membangun image Docker dari `Dockerfile`.
 2. Menyinkronkan file ke server `sshd.meansrev.tech` melalui tunnel Cloudflare Access.
-3. Menjalankan `docker compose up -d --build` di direktori `/opt/si-ruangan`.
+3. Menjalankan `docker compose up -d --build` di direktori `~/si-ruangan` (home directory user SSH, karena tidak punya akses `/opt`).
 4. Melakukan health check ke `http://localhost:8085/health`.
 
 Konfigurasi yang diperlukan di **Settings > Secrets and variables > Actions** repositori GitHub:

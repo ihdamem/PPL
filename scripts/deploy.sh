@@ -22,7 +22,7 @@ SSH_USER="$(echo -n "${SSH_USER:-webserver-2}" | tr -d '[:space:]')"
 SSH_PASSWORD="${SSH_PASSWORD:-}"
 CF_ACCESS_CLIENT_ID="${CF_ACCESS_CLIENT_ID:-}"
 CF_ACCESS_CLIENT_SECRET="${CF_ACCESS_CLIENT_SECRET:-}"
-REMOTE_DIR="${REMOTE_DIR:-/opt/si-ruangan}"
+REMOTE_DIR="${REMOTE_DIR:-~/si-ruangan}"
 
 if [[ -z "$SSH_PASSWORD" ]]; then
   echo "ERROR: SSH_PASSWORD is not set." >&2
