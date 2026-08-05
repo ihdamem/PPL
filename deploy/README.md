@@ -4,10 +4,11 @@ Panduan singkat untuk menjalankan landing page / aplikasi SiRuangan di server ti
 
 ## Prasyarat Server
 
-1. Docker dan Docker Compose sudang terpasang.
-2. `cloudflared` sudang terpasang di server untuk tunnel SSH / publik.
-3. Cloudflare Tunnel sudang diarahkan ke port `8085` di server.
-4. (Opsional untuk CI/CD) GitHub Actions runner dapat mengakses server via SSH melalui Cloudflare Access.
+1. Docker dan Docker Compose sudah terpasang.
+2. `cloudflared` sudah terpasang di server untuk tunnel SSH / publik.
+3. Cloudflare Tunnel sudah diarahkan ke port `8085` di server.
+4. File kredensial Google OAuth sudah ada di `~/google-login-credentials.json` di server.
+5. (Opsional untuk CI/CD) GitHub Actions runner dapat mengakses server via SSH melalui Cloudflare Access.
 
 ## Struktur File yang Dideploy
 
@@ -15,14 +16,32 @@ Default deploy ke home directory user `webserver-2` karena user tidak punya akse
 
 ```
 ~/si-ruangan
+├── backend/
+├── frontend/
+├── landing/
 ├── Dockerfile
 ├── docker-compose.yml
 ├── nginx.conf
-└── landing/
-    ├── index.html
-    ├── css/styles.css
-    └── js/app.js
+└── google-login-credentials.json   # tidak ikut di-deploy dari repo
 ```
+
+## Menyiapkan Kredensial Google OAuth
+
+1. Buat OAuth 2.0 Client ID di [Google Cloud Console](https://console.cloud.google.com/apis/credentials).
+2. Tambahkan **Authorized redirect URI**:
+   - Lokal: `http://localhost:8085/api/auth/google/callback`
+   - Produksi: `https://ruangan.meansrev.tech/api/auth/google/callback` (sesuaikan domain)
+3. Simpan file JSON di server pada path `~/google-login-credentials.json`:
+
+```json
+{
+  "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  "client_secret": "YOUR_CLIENT_SECRET",
+  "redirect_uri": "https://ruangan.meansrev.tech/api/auth/google/callback"
+}
+```
+
+File ini dibaca langsung oleh container backend melalui volume mount; tidak perlu menyimpannya sebagai environment variable.
 
 ## Menjalankan Aplikasi
 
@@ -31,17 +50,29 @@ cd ~/si-ruangan
 docker compose up -d --build
 ```
 
-Aplikasi akan berjalan di container `si-ruangan-web` dan dipublikasikan ke host pada port `8085`.
+Aplikasi akan berjalan di beberapa container dan dipublikasikan ke host pada port `8085`.
 
 - Akses lokal server: http://localhost:8085
 - URL publik: sesuai konfigurasi Cloudflare Tunnel (misalnya https://ruangan.meansrev.tech atau domain lain yang ditentukan tim).
+
+### Routing Path
+
+| Path | Layanan |
+|------|---------|
+| `/` | Landing page statis |
+| `/app` dan `/app/*` | Portal frontend (Next.js + shadcn/ui) |
+| `/api` dan `/api/*` | FastAPI backend |
+| `/health` | Healthcheck nginx |
 
 ## Memeriksa Status
 
 ```bash
 docker compose ps
 docker compose logs -f web
+docker compose logs -f backend
+docker compose logs -f frontend
 curl -sf http://localhost:8085/health
+curl -sf http://localhost:8085/api/health
 ```
 
 ## Update ke Versi Terbaru
@@ -57,6 +88,8 @@ docker compose ps
 
 Jika menggunakan GitHub Actions, cukup push ke branch `main`. Pipeline akan otomatis mensinkronkan file dan menjalankan `docker compose up -d --build` di server.
 
+> **Catatan:** File `~/google-login-credentials.json` tidak ikut tersalin dari repo. Pastikan file tersebut tetap ada di server setelah deploy.
+
 ## Menambahkan Anggota Tim ke Cloudflare Access
 
 1. Buka dashboard Cloudflare Zero Trust.
@@ -68,5 +101,6 @@ Jika menggunakan GitHub Actions, cukup push ke branch `main`. Pipeline akan otom
 
 - **Akses denied ke `/opt`**: default deploy sekarang menggunakan `~/si-ruangan` (home directory user `webserver-2`). Jangan pakai `/opt`.
 - **Port 8085 tidak bisa diakses**: periksa firewall server dan pastikan Cloudflare Tunnel mengarah ke `http://localhost:8085`.
-- **Container tidak start**: jalankan `docker compose logs web` untuk melihat pesan error nginx.
+- **Container tidak start**: jalankan `docker compose logs <service>` untuk melihat pesan error.
+- **Login Google gagal**: pastikan `~/google-login-credentials.json` ada dan `redirect_uri` di dalamnya cocok dengan domain publik serta didaftarkan di Google Cloud Console.
 - **File landing tidak muncul**: pastikan folder `landing/` ikut tersalin saat deploy (rsync atau `git pull` berhasil).

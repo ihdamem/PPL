@@ -11,3 +11,7 @@ img/
 README.md
 deploy/
 scripts/
+backend/
+frontend/
+node_modules
+.next

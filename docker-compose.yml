@@ -5,22 +5,34 @@ services:
     ports:
       - "8085:80"
     restart: unless-stopped
-    # Future services can be added here, e.g.:
-    # backend:
-    #   build: ./backend
-    #   environment:
-    #     - DATABASE_URL=postgresql://...
-    #   depends_on:
-    #     - db
-    #
-    # db:
-    #   image: postgres:16-alpine
-    #   environment:
-    #     POSTGRES_DB: siruangan
-    #     POSTGRES_USER: siruangan
-    #     POSTGRES_PASSWORD: ${DB_PASSWORD:-changeme}
-    #   volumes:
-    #     - postgres_data:/var/lib/postgresql/data
+    depends_on:
+      - frontend
+      - backend
+    networks:
+      - siruangan-net
 
-# volumes:
-#   postgres_data:
+  frontend:
+    build: ./frontend
+    container_name: si-ruangan-frontend
+    restart: unless-stopped
+    networks:
+      - siruangan-net
+
+  backend:
+    build: ./backend
+    container_name: si-ruangan-backend
+    restart: unless-stopped
+    volumes:
+      # Mount the Google OAuth credentials file from the host home directory.
+      # Local path: ~/google-login-credentials.json
+      # Server path: ~/google-login-credentials.json
+      - ~/google-login-credentials.json:/app/credentials/google-login-credentials.json:ro
+    environment:
+      - GOOGLE_CREDENTIALS_FILE=/app/credentials/google-login-credentials.json
+      - CORS_ORIGINS=http://localhost:8085
+    networks:
+      - siruangan-net
+
+networks:
+  siruangan-net:
+    driver: bridge
