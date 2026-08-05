@@ -8,6 +8,33 @@ Sistem ini dirancang untuk mempermudah proses peminjaman ruangan di lingkungan k
 
 ---
 
+## 🚀 Menjalankan Secara Lokal
+
+Pastikan file `~/google-login-credentials.json` sudah ada. Contoh format:
+
+```json
+{
+  "client_id": "YOUR_CLIENT_ID.apps.googleusercontent.com",
+  "client_secret": "YOUR_CLIENT_SECRET",
+  "redirect_uri": "http://localhost:8085/api/auth/google/callback"
+}
+```
+
+Lalu jalankan:
+
+```bash
+docker compose up -d --build
+```
+
+Akses aplikasi di `http://localhost:8085`:
+
+- `/` — Landing page
+- `/app` — Portal frontend (Next.js + shadcn/ui)
+- `/app/login` — Halaman login Google
+- `/api` — FastAPI backend
+
+---
+
 ## 📋 Rencana Pengembangan
 
 | Fase | Kegiatan |
@@ -24,11 +51,21 @@ Sistem ini dirancang untuk mempermudah proses peminjaman ruangan di lingkungan k
 
 ```
 PPL/
+├── backend/            # FastAPI backend (uv)
+│   ├── app/            # Modul aplikasi: auth, config, models
+│   ├── Dockerfile
+│   ├── pyproject.toml
+│   └── uv.lock
+├── frontend/           # Next.js + shadcn/ui portal
+│   ├── app/            # App router
+│   ├── components/     # Komponen shadcn/ui
+│   ├── Dockerfile
+│   └── package.json
 ├── landing/            # Halaman landing page statis (HTML/CSS/JS)
 ├── deploy/             # Panduan deployment untuk tim
 ├── scripts/            # Skrip deploy manual via Cloudflare tunnel
 ├── .github/workflows/  # GitHub Actions CI/CD
-├── Dockerfile          # Image nginx untuk melayani landing page
+├── Dockerfile          # Image nginx untuk reverse proxy + landing page
 ├── nginx.conf          # Konfigurasi web server nginx
 ├── docker-compose.yml  # Orkestrasi container, menerbitkan port 8085
 ├── initial-plan.md     # Dokumen rencana dan desain awal
@@ -37,7 +74,22 @@ PPL/
 └── .gitignore          # Daftar file/folder yang diabaikan Git
 ```
 
-Struktur implementasi (backend, database, dsb.) akan ditambahkan pada fase pengembangan berikutnya.
+---
+
+## 🔐 Autentikasi Google OAuth
+
+Backend membaca kredensial Google dari file, bukan environment variable:
+
+- Path di host: `~/google-login-credentials.json`
+- Path di container backend: `/app/credentials/google-login-credentials.json`
+- Format: lihat `google-login-credentials.example.json`
+
+Ubah `redirect_uri` sesuai domain/server:
+
+- Lokal: `http://localhost:8085/api/auth/google/callback`
+- Produksi: `https://your-domain/api/auth/google/callback`
+
+Pastikan URI tersebut didaftarkan di **Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client IDs**.
 
 ---
 
