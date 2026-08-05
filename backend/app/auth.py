@@ -87,9 +87,13 @@ async def google_callback(request: Request, code: str, state: str):
         client_secret=creds.client_secret,
         redirect_uri=creds.redirect_uri,
     )
+    callback_url = creds.redirect_uri
+    if request.query_params:
+        callback_url += "?" + str(request.query_params)
+
     token = await client.fetch_token(
         creds.token_uri,
-        authorization_response=str(request.url),
+        authorization_response=callback_url,
     )
 
     resp = await client.get(
@@ -107,7 +111,7 @@ async def google_callback(request: Request, code: str, state: str):
     )
 
     session_cookie = encode_session(user)
-    redirect_response = RedirectResponse(url="/app")
+    redirect_response = RedirectResponse(url="/app/dashboard")
     _set_cookie(redirect_response, settings.session_cookie_name, session_cookie, max_age=86400 * 7)
     redirect_response.delete_cookie("google_oauth_state")
     return redirect_response
