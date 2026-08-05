@@ -1,0 +1,1 @@
+# Keep this directory so the Next.js public folder exists in Docker builds.
