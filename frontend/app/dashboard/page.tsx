@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft } from "lucide-react";
+import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft, ShieldCheck } from "lucide-react";
 
 type User = {
   email: string;
@@ -18,7 +18,7 @@ const menuItems = [
     icon: Calendar,
     title: "Booking Ruangan",
     desc: "Ajukan atau lihat jadwal peminjaman ruangan.",
-    href: "#",
+    href: "/dashboard/booking/new",
   },
   {
     icon: Building2,
@@ -30,7 +30,13 @@ const menuItems = [
     icon: ClipboardList,
     title: "Riwayat Pengajuan",
     desc: "Pantau status peminjaman yang pernah diajukan.",
-    href: "#",
+    href: "/dashboard/booking/history",
+  },
+  {
+    icon: ShieldCheck,
+    title: "Approval Peminjaman",
+    desc: "Tinjau dan setujui/tolak pengajuan peminjaman ruangan.",
+    href: "/dashboard/approval",
   },
 ];
 
