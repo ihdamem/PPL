@@ -68,7 +68,7 @@ export default function NewBookingPage() {
     };
 
     try {
-      const res = await fetch("/app/api/bookings", {
+      const res = await fetch("/api/bookings", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -80,7 +80,7 @@ export default function NewBookingPage() {
         throw new Error(errData.detail || "Gagal mengajukan peminjaman");
       }
 
-      router.push("/dashboard/booking/history");
+      router.push("/app/dashboard/booking/history");
     } catch (err: any) {
       setError(err.message);
     } finally {
@@ -89,24 +89,24 @@ export default function NewBookingPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
+    <main className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-2xl">
         <Link
           href="/dashboard"
-          className="mb-6 flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-ugm-dark"
+          className="mb-6 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
         >
           <ArrowLeft className="size-4" />
           Kembali ke Dashboard
         </Link>
 
-        <div className="rounded-xl border border-slate-200 bg-white p-8 shadow-sm">
+        <div className="rounded-xl border border-border bg-card p-8 shadow-sm">
           <div className="mb-8">
-            <h1 className="text-2xl font-bold text-ugm-dark">Form Peminjaman Ruangan</h1>
-            <p className="text-slate-500">Isi detail peminjaman ruangan di bawah ini.</p>
+            <h1 className="text-2xl font-bold text-foreground">Form Peminjaman Ruangan</h1>
+            <p className="text-muted-foreground">Isi detail peminjaman ruangan di bawah ini.</p>
           </div>
 
           {error && (
-            <div className="mb-6 rounded-lg bg-red-50 p-4 text-sm text-red-600 border border-red-100">
+            <div className="mb-6 rounded-lg bg-destructive/10 p-4 text-sm text-destructive border border-destructive/20">
               {error}
             </div>
           )}
@@ -114,21 +114,21 @@ export default function NewBookingPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Calendar className="size-4 text-slate-400" />
+                <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Calendar className="size-4 text-muted-foreground" />
                   Tanggal Peminjaman
                 </label>
                 <input
                   required
                   name="tanggal"
                   type="date"
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
+                  className="w-full rounded-lg border border-input bg-background text-foreground p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Users className="size-4 text-slate-400" />
+                <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Users className="size-4 text-muted-foreground" />
                   Jumlah Peserta
                 </label>
                 <input
@@ -137,42 +137,42 @@ export default function NewBookingPage() {
                   type="number"
                   min="1"
                   placeholder="Contoh: 10"
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
+                  className="w-full rounded-lg border border-input bg-background text-foreground p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
                 />
               </div>
             </div>
 
             <div className="grid gap-6 md:grid-cols-2">
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Clock className="size-4 text-slate-400" />
+                <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Clock className="size-4 text-muted-foreground" />
                   Waktu Mulai
                 </label>
                 <input
                   required
                   name="waktu_mulai"
                   type="time"
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
+                  className="w-full rounded-lg border border-input bg-background text-foreground p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
                 />
               </div>
 
               <div className="space-y-2">
-                <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                  <Clock className="size-4 text-slate-400" />
+                <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                  <Clock className="size-4 text-muted-foreground" />
                   Waktu Selesai
                 </label>
                 <input
                   required
                   name="waktu_selesai"
                   type="time"
-                  className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
+                  className="w-full rounded-lg border border-input bg-background text-foreground p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <FileText className="size-4 text-slate-400" />
+              <label className="text-sm font-semibold text-foreground flex items-center gap-2">
+                <FileText className="size-4 text-muted-foreground" />
                 Keperluan / Acara
               </label>
               <textarea
@@ -180,20 +180,20 @@ export default function NewBookingPage() {
                 name="keperluan"
                 rows={3}
                 placeholder="Jelaskan tujuan peminjaman ruangan..."
-                className="w-full rounded-lg border border-slate-200 p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
+                className="w-full rounded-lg border border-input bg-background text-foreground p-2.5 text-sm focus:border-ugm-yellow focus:outline-none focus:ring-1 focus:ring-ugm-yellow"
               ></textarea>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-semibold text-slate-700">
+              <label className="text-sm font-semibold text-foreground">
                 Upload Surat Permohonan (PDF)
               </label>
               <input
                 type="file"
                 accept=".pdf"
-                className="w-full cursor-pointer rounded-lg border border-dashed border-slate-300 bg-slate-50 p-4 text-sm text-slate-600 file:mr-4 file:rounded-full file:border-0 file:bg-ugm-dark file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:bg-slate-100"
+                className="w-full cursor-pointer rounded-lg border border-dashed border-border bg-muted/40 p-4 text-sm text-muted-foreground file:mr-4 file:rounded-full file:border-0 file:bg-ugm-dark file:px-4 file:py-2 file:text-xs file:font-semibold file:text-white hover:bg-muted"
               />
-              <p className="text-xs text-slate-400 italic">* Maksimal 5MB</p>
+              <p className="text-xs text-muted-foreground italic">* Maksimal 5MB</p>
             </div>
 
             <Button

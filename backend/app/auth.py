@@ -8,7 +8,7 @@ from itsdangerous.url_safe import URLSafeTimedSerializer
 from itsdangerous.exc import BadSignature, SignatureExpired
 
 from app.config import load_google_credentials, settings
-from app.models import User
+from app.models import User, Role
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -117,6 +117,22 @@ async def google_callback(request: Request, code: str, state: str):
 async def auth_me(request: Request):
     user = require_user(request)
     return user
+
+
+@router.get("/mock-login")
+async def mock_login():
+    """Endpoint khusus untuk development lokal agar bisa login tanpa Google OAuth."""
+    user = User(
+        email="aldi@ugm.ac.id",
+        name="Aldi (Approver)",
+        picture="https://ui-avatars.com/api/?name=Aldi",
+        sub="mock-user-aldi-123",
+        role=Role.APPROVER,
+    )
+    session_cookie = encode_session(user)
+    redirect_response = RedirectResponse(url="/app/dashboard")
+    _set_cookie(redirect_response, settings.session_cookie_name, session_cookie, max_age=86400 * 7)
+    return redirect_response
 
 
 @router.post("/logout")

@@ -8,6 +8,7 @@ import Link from "next/link";
 type Booking = {
   id: number;
   user_id: string;
+  room_id: number;
   tanggal: string;
   waktu_mulai: string;
   waktu_selesai: string;
@@ -28,7 +29,7 @@ export default function ApprovalDashboardPage() {
 
   const fetchBookings = () => {
     setLoading(true);
-    fetch("/app/api/bookings", { credentials: "include" })
+    fetch("/api/bookings", { credentials: "include" })
       .then((res) => res.json())
       .then((data) => {
         // Filter only pending bookings for approval dashboard
@@ -43,7 +44,7 @@ export default function ApprovalDashboardPage() {
     if (!confirm("Setujui peminjaman ini?")) return;
     
     try {
-      const res = await fetch(`/app/api/bookings/${id}/approval`, {
+      const res = await fetch(`/api/bookings/${id}/approval`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -65,7 +66,7 @@ export default function ApprovalDashboardPage() {
     if (!rejectReason.trim()) return alert("Alasan penolakan harus diisi");
     
     try {
-      const res = await fetch(`/app/api/bookings/${rejectingId}/approval`, {
+      const res = await fetch(`/api/bookings/${rejectingId}/approval`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -86,58 +87,58 @@ export default function ApprovalDashboardPage() {
   };
 
   return (
-    <main className="min-h-screen bg-slate-50 p-6">
+    <main className="min-h-screen bg-background p-6">
       <div className="mx-auto max-w-5xl">
         <div className="mb-8">
           <Link
             href="/dashboard"
-            className="mb-2 flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-ugm-dark"
+            className="mb-2 flex items-center gap-2 text-sm font-medium text-muted-foreground hover:text-foreground"
           >
             <ArrowLeft className="size-4" />
             Kembali ke Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-ugm-dark">Dashboard Approval (Aldi)</h1>
-          <p className="text-slate-500">Tinjau dan berikan keputusan untuk pengajuan peminjaman ruangan.</p>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard Approval (Aldi)</h1>
+          <p className="text-muted-foreground">Tinjau dan berikan keputusan untuk pengajuan peminjaman ruangan.</p>
         </div>
 
         {loading ? (
-          <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white">
-            <p className="text-slate-500">Memuat data pengajuan...</p>
+          <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border bg-card">
+            <p className="text-muted-foreground">Memuat data pengajuan...</p>
           </div>
         ) : bookings.length === 0 ? (
-          <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-slate-300 bg-white p-8 text-center">
-            <CheckCircle className="mb-4 size-12 text-green-300" />
-            <h3 className="text-lg font-semibold text-slate-700">Semua Beres!</h3>
-            <p className="text-slate-500">Tidak ada pengajuan peminjaman yang menunggu persetujuan.</p>
+          <div className="flex h-64 flex-col items-center justify-center rounded-xl border border-dashed border-border bg-card p-8 text-center">
+            <CheckCircle className="mb-4 size-12 text-green-400 dark:text-green-500" />
+            <h3 className="text-lg font-semibold text-foreground">Semua Beres!</h3>
+            <p className="text-muted-foreground">Tidak ada pengajuan peminjaman yang menunggu persetujuan.</p>
           </div>
         ) : (
           <div className="grid gap-4">
             {bookings.map((booking) => (
               <div
                 key={booking.id}
-                className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm"
+                className="rounded-xl border border-border bg-card p-6 shadow-sm"
               >
                 <div className="flex flex-col justify-between gap-4 md:flex-row md:items-start">
                   <div className="space-y-3">
                     <div>
-                      <h3 className="text-lg font-bold text-slate-800">{booking.keperluan}</h3>
-                      <p className="text-sm text-slate-500">Pemohon: {booking.user_id}</p>
+                      <h3 className="text-lg font-bold text-card-foreground">{booking.keperluan}</h3>
+                      <p className="text-sm text-muted-foreground">Pemohon: {booking.user_id}</p>
                     </div>
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-slate-600">
+                    <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
-                        <Info className="size-4 text-slate-400" />
+                        <Info className="size-4 text-muted-foreground" />
                         <span>Ruangan ID: {booking.room_id}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Info className="size-4 text-slate-400" />
+                        <Info className="size-4 text-muted-foreground" />
                         <span>Peserta: {booking.jumlah_peserta} orang</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Info className="size-4 text-slate-400" />
+                        <Info className="size-4 text-muted-foreground" />
                         <span>Tanggal: {booking.tanggal}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <Info className="size-4 text-slate-400" />
+                        <Info className="size-4 text-muted-foreground" />
                         <span>Waktu: {booking.waktu_mulai.slice(0, 5)} - {booking.waktu_selesai.slice(0, 5)}</span>
                       </div>
                     </div>
@@ -163,8 +164,8 @@ export default function ApprovalDashboardPage() {
                 </div>
 
                 {rejectingId === booking.id && (
-                  <div className="mt-6 rounded-lg bg-red-50 p-4 border border-red-100">
-                    <label className="mb-2 block text-sm font-semibold text-red-800 flex items-center gap-2">
+                  <div className="mt-6 rounded-lg bg-destructive/10 p-4 border border-destructive/20">
+                    <label className="mb-2 block text-sm font-semibold text-destructive flex items-center gap-2">
                       <MessageSquare className="size-4" />
                       Alasan Penolakan
                     </label>
@@ -172,15 +173,15 @@ export default function ApprovalDashboardPage() {
                       value={rejectReason}
                       onChange={(e) => setRejectReason(e.target.value)}
                       placeholder="Tuliskan alasan kenapa pengajuan ini ditolak..."
-                      className="w-full rounded-lg border border-red-200 p-3 text-sm focus:border-red-400 focus:outline-none focus:ring-1 focus:ring-red-400"
+                      className="w-full rounded-lg border border-destructive/30 bg-background text-foreground p-3 text-sm focus:border-destructive focus:outline-none focus:ring-1 focus:ring-destructive"
                       rows={3}
                     ></textarea>
                     <div className="mt-3 flex justify-end gap-2">
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
+                      <Button
+                        variant="ghost"
+                        size="sm"
                         onClick={() => { setRejectingId(null); setRejectReason(""); }}
-                        className="text-slate-600"
+                        className="text-muted-foreground"
                       >
                         Batal
                       </Button>

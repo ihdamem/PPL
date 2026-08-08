@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type User = {
   email: string;
@@ -77,7 +78,7 @@ export default function DashboardPage() {
   }
 
   return (
-    <main className="min-h-screen bg-slate-50">
+    <main className="min-h-screen bg-background">
       {/* Header */}
       <header className="sticky top-0 z-50 border-b border-white/10 bg-ugm-dark/95 backdrop-blur">
         <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
@@ -88,6 +89,7 @@ export default function DashboardPage() {
             <span className="text-lg font-extrabold tracking-tight">SiRuangan</span>
           </Link>
           <div className="flex items-center gap-3">
+            <ThemeToggle className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
             <Button
               variant="outline"
               size="sm"
@@ -132,13 +134,13 @@ export default function DashboardPage() {
             <Link
               key={item.title}
               href={item.href}
-              className="group rounded-xl border border-slate-200 bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:border-ugm-blue/30 hover:shadow-md"
+              className="group rounded-xl border border-border bg-card p-6 shadow-sm transition hover:-translate-y-1 hover:border-ugm-blue/30 hover:shadow-md"
             >
               <div className="mb-4 grid h-11 w-11 place-items-center rounded-lg bg-ugm-blue text-white">
                 <item.icon className="size-5" />
               </div>
-              <h3 className="text-lg font-semibold text-ugm-dark">{item.title}</h3>
-              <p className="text-sm text-slate-500">{item.desc}</p>
+              <h3 className="text-lg font-semibold text-card-foreground">{item.title}</h3>
+              <p className="text-sm text-muted-foreground">{item.desc}</p>
             </Link>
           ))}
         </div>
