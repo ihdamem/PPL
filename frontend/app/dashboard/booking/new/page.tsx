@@ -80,7 +80,7 @@ export default function NewBookingPage() {
         throw new Error(errData.detail || "Gagal mengajukan peminjaman");
       }
 
-      router.push("/app/dashboard/booking/history");
+      router.push("/dashboard/booking/history");
     } catch (err: any) {
       setError(err.message);
     } finally {

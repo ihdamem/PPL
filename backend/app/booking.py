@@ -18,7 +18,7 @@ class ApprovalRequest(BaseModel):
     alasan_penolakan: Optional[str] = None
 
 
-@router.post("/", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
+@router.post("", response_model=BookingResponse, status_code=status.HTTP_201_CREATED)
 async def create_booking(booking: BookingCreate, current_user: User = Depends(require_user)):
     global booking_id_counter
 
@@ -44,7 +44,7 @@ async def create_booking(booking: BookingCreate, current_user: User = Depends(re
     return new_booking
 
 
-@router.get("/", response_model=List[BookingResponse])
+@router.get("", response_model=List[BookingResponse])
 async def get_bookings(current_user: User = Depends(require_user)):
     # If admin or approver, return all bookings
     if current_user.role in [Role.ADMIN, Role.APPROVER]:
