@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LogIn, ArrowLeft, Calendar, Building2, ShieldCheck } from "lucide-react";
+import { ThemeToggle } from "@/components/theme-toggle";
 
 type User = {
   email: string;
@@ -42,17 +43,20 @@ export default function PortalPage() {
             </span>
             <span className="text-lg font-extrabold tracking-tight">SiRuangan</span>
           </Link>
-          <Button
-            variant="outline"
-            size="sm"
-            asChild
-            className="border-white/20 text-white hover:bg-white/10 hover:text-white"
-          >
-            <a href="/">
-              <ArrowLeft className="mr-1 size-4" />
-              Kembali ke Landing Page
-            </a>
-          </Button>
+          <div className="flex items-center gap-3">
+            <ThemeToggle className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
+            <Button
+              variant="outline"
+              size="sm"
+              asChild
+              className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+            >
+              <a href="/">
+                <ArrowLeft className="mr-1 size-4" />
+                Kembali ke Landing Page
+              </a>
+            </Button>
+          </div>
         </div>
       </header>
 

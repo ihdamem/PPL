@@ -11,6 +11,7 @@ frontend/.next/
 frontend/out/
 frontend/dist/
 frontend/.env*
+frontend/tsconfig.tsbuildinfo
 
 # Backend
 backend/.venv/
