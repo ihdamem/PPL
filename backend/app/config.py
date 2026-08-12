@@ -13,6 +13,7 @@ class Settings(BaseSettings):
     google_credentials_file: str = "/app/credentials/google-login-credentials.json"
     cors_origins: str = "*"
     secure_cookies: bool = False
+    super_admin_email: str = "aldi@ugm.ac.id"
 
     @property
     def cors_origins_list(self) -> list[str]:

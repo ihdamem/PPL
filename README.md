@@ -47,6 +47,24 @@ Akses aplikasi di `http://localhost:8085`:
 
 ---
 
+## ✅ Status Implementasi
+
+Dibandingkan dengan requirement di [`initial-plan.md`](initial-plan.md):
+
+| Fitur | Status |
+|---|---|
+| Autentikasi (Google OAuth + `mock-login` untuk development) | ✅ Selesai |
+| Pengajuan booking, riwayat, dan approval (approve/reject + alasan penolakan) | ✅ Selesai |
+| Audit log (FR-10) — mencatat setiap aksi create/approve/reject | ✅ Selesai (`backend/app/audit.py`) |
+| Notifikasi dalam aplikasi — ikon lonceng di dashboard | ✅ Selesai (`backend/app/notifications.py`, `frontend/components/notification-bell.tsx`) |
+| Dark mode | ✅ Selesai |
+| Notifikasi email (FR-08) | ❌ Belum — butuh kredensial layanan email (SMTP/SendGrid dsb.) |
+| Pemetaan role otomatis untuk login Google asli | ❌ Belum — lihat bagian [Manajemen Role & Akses](#-manajemen-role--akses) |
+| Manajemen ruangan / CRUD room | ❌ Belum diimplementasikan |
+| Deteksi konflik jadwal otomatis (FR-06) | ❌ Belum diimplementasikan |
+
+---
+
 ## 🗂️ Struktur Repositori
 
 ```
@@ -90,6 +108,39 @@ Ubah `redirect_uri` sesuai domain/server:
 - Produksi: `https://your-domain/api/auth/google/callback`
 
 Pastikan URI tersebut didaftarkan di **Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client IDs**.
+
+---
+
+## 🔑 Manajemen Role & Akses
+
+Sistem memiliki 3 role (`backend/app/models.py`): `user`, `admin`, dan `approver`. Sesuai persona di [`initial-plan.md`](initial-plan.md), **Admin merangkap sebagai penyetuju booking** — role `approver` di kode adalah pemisahan teknis tambahan untuk fleksibilitas ke depan, bukan persona terpisah di rencana awal. Keduanya (`admin` dan `approver`) sama-sama boleh approve/reject booking.
+
+### ⚠️ Status saat ini: belum ada pemetaan role otomatis
+
+Saat user login lewat Google OAuth asli (`backend/app/auth.py`, endpoint `/auth/google/callback`), role **selalu default ke `user`** — tidak ada mekanisme untuk menjadikan seseorang admin/approver. Satu-satunya cara mendapat role `approver` saat ini adalah lewat endpoint `/auth/mock-login`, yang khusus untuk development lokal (bukan untuk produksi).
+
+Artinya: di server produksi sekarang, **belum ada seorang pun yang bisa membuka dashboard approval** lewat login Google asli.
+
+### Rencana implementasi (disepakati tim)
+
+Alih-alih form pilihan role saat login (rawan disalahgunakan — siapa pun bisa asal klik "admin"), dipakai model **super admin yang meng-assign role dari dalam aplikasi**:
+
+1. **Default saat login pertama kali**: siapa pun yang login lewat Google (belum pernah login sebelumnya) otomatis dapat role `user` (peminjam).
+2. **1 super admin tetap**: ditentukan lewat satu email di konfigurasi environment variable `SUPER_ADMIN_EMAIL` (bukan role terpisah di database — orang ini otomatis dapat role `admin` plus kewenangan ekstra untuk mengelola role user lain). Default sementara: `aldi@ugm.ac.id` (identitas `mock-login` untuk memudahkan testing lokal) — **wajib diganti ke email asli saat deploy produksi**.
+3. **Super admin bisa assign role user lain** — naik jadi `admin` atau `approver`, atau turun lagi jadi `user` biasa — lewat halaman khusus di dashboard ("Kelola User"), bukan lewat env var per orang.
+4. Supaya ini bisa jalan, sistem perlu **menyimpan daftar user yang pernah login** (belum ada sebelumnya — sebelumnya data user cuma hidup sesaat, tidak pernah disimpan lintas sesi). Disimpan in-memory dulu (`backend/app/user_store.py`), konsisten dengan pola penyimpanan booking/audit/notifikasi yang sudah ada.
+
+### Rencana teknis (belum diimplementasikan)
+
+| Bagian | Rencana |
+|---|---|
+| `backend/app/config.py` | Tambah `super_admin_email` |
+| `backend/app/user_store.py` *(baru)* | `fake_users_db` (dict per email), `get_or_create_user()`, `is_super_admin()` |
+| `backend/app/users.py` *(baru)* | `GET /api/users` (daftar user, khusus super admin), `PATCH /api/users/{email}/role` (ubah role, khusus super admin) |
+| `backend/app/auth.py` | `google_callback` & `mock_login` pakai `get_or_create_user()` (role persisten, bukan dibuat ulang tiap login); `/auth/me` menyertakan flag `is_super_admin` |
+| Frontend | Halaman baru `dashboard/users` ("Kelola User"), menu ini cuma tampil kalau `is_super_admin === true` |
+
+Status: **belum diimplementasikan** — didokumentasikan di sini sebagai rencana yang sudah disepakati tim, sebelum dikerjakan.
 
 ---
 

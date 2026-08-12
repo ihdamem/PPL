@@ -97,7 +97,7 @@ export default function ApprovalDashboardPage() {
             <ArrowLeft className="size-4" />
             Kembali ke Dashboard
           </Link>
-          <h1 className="text-2xl font-bold text-foreground">Dashboard Approval (Aldi)</h1>
+          <h1 className="text-2xl font-bold text-foreground">Dashboard Approval</h1>
           <p className="text-muted-foreground">Tinjau dan berikan keputusan untuk pengajuan peminjaman ruangan.</p>
         </div>
 

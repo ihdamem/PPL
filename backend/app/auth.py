@@ -12,6 +12,12 @@ from app.models import User, Role
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
+# Daftar email yang otomatis mendapatkan role ADMIN saat login pertama kali
+SUPER_ADMIN_EMAILS = [
+    "aldi@ugm.ac.id",
+    # Tambahkan email Anda di sini untuk mencoba akses admin
+]
+
 
 def _serializer() -> URLSafeTimedSerializer:
     return URLSafeTimedSerializer(settings.secret_key)
@@ -99,11 +105,16 @@ async def google_callback(request: Request, code: str, state: str):
     resp.raise_for_status()
     info = resp.json()
 
+    # Tentukan role berdasarkan email
+    email = info["email"]
+    user_role = Role.ADMIN if email in SUPER_ADMIN_EMAILS else Role.USER
+
     user = User(
-        email=info["email"],
+        email=email,
         name=info.get("name"),
         picture=info.get("picture"),
         sub=info["id"],
+        role=user_role,
     )
 
     session_cookie = encode_session(user)
@@ -123,10 +134,10 @@ async def auth_me(request: Request):
 async def mock_login():
     """Endpoint khusus untuk development lokal agar bisa login tanpa Google OAuth."""
     user = User(
-        email="aldi@ugm.ac.id",
-        name="Aldi (Approver)",
-        picture="https://ui-avatars.com/api/?name=Aldi",
-        sub="mock-user-aldi-123",
+        email="admin@ugm.ac.id",
+        name="Admin (Approver)",
+        picture="https://ui-avatars.com/api/?name=Admin",
+        sub="mock-user-admin-123",
         role=Role.APPROVER,
     )
     session_cookie = encode_session(user)
