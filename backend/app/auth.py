@@ -9,6 +9,10 @@ from itsdangerous.exc import BadSignature, SignatureExpired
 
 from app.config import load_google_credentials, settings
 from app.models import User, Role
+from app.database import (
+    get_user_by_sub,
+    upsert_google_user,
+)
 
 router = APIRouter(prefix="/auth", tags=["auth"])
 
@@ -18,14 +22,17 @@ def _serializer() -> URLSafeTimedSerializer:
 
 
 def encode_session(user: User) -> str:
-    return _serializer().dumps(user.model_dump(), salt=settings.session_cookie_name)
+    return _serializer().dumps(
+        user.model_dump(mode="json"),
+        salt=settings.session_cookie_name,
+    )
 
 
 def decode_session(token: str) -> Optional[User]:
     try:
         data = _serializer().loads(token, salt=settings.session_cookie_name, max_age=86400 * 7)
         return User(**data)
-    except (BadSignature, SignatureExpired, json.JSONDecodeError):
+    except (BadSignature, SignatureExpired, json.JSONDecodeError, ValueError):
         return None
 
 
@@ -53,6 +60,16 @@ def _set_cookie(response: Response, key: str, value: str, max_age: int) -> None:
         secure=settings.secure_cookies,
     )
 
+def role_for_email(email: str) -> Role:
+    normalized = email.strip().lower()
+
+    if normalized in settings.admin_email_set:
+        return Role.ADMIN
+
+    if normalized in settings.approver_email_set:
+        return Role.APPROVER
+
+    return Role.USER
 
 @router.get("/google")
 async def login_with_google():
@@ -99,35 +116,99 @@ async def google_callback(request: Request, code: str, state: str):
     resp.raise_for_status()
     info = resp.json()
 
-    user = User(
-        email=info["email"],
+    email = info["email"]
+
+    role = role_for_email(email)
+
+    user = upsert_google_user(
+        email=email,
         name=info.get("name"),
         picture=info.get("picture"),
         sub=info["id"],
+        role=role,
     )
 
     session_cookie = encode_session(user)
-    redirect_response = RedirectResponse(url="/app")
+    redirect_response = RedirectResponse(
+        url="/app/dashboard"
+    )
     _set_cookie(redirect_response, settings.session_cookie_name, session_cookie, max_age=86400 * 7)
     redirect_response.delete_cookie("google_oauth_state")
     return redirect_response
 
+@router.get(
+    "/me",
+    response_model=User,
+)
+async def auth_me(
+    request: Request,
+):
+    current_user = require_user(request)
 
-@router.get("/me")
-async def auth_me(request: Request):
-    user = require_user(request)
-    return user
+    stored_user = get_user_by_sub(
+        current_user.sub
+    )
 
+    return stored_user or current_user
 
 @router.get("/mock-login")
-async def mock_login():
-    """Endpoint khusus untuk development lokal agar bisa login tanpa Google OAuth."""
-    user = User(
-        email="aldi@ugm.ac.id",
-        name="Aldi (Approver)",
-        picture="https://ui-avatars.com/api/?name=Aldi",
-        sub="mock-user-aldi-123",
-        role=Role.APPROVER,
+async def mock_login(
+    role: str = "user",
+):
+    """
+    Development-only login helper.
+
+    /api/auth/mock-login?role=user
+    /api/auth/mock-login?role=admin
+    /api/auth/mock-login?role=approver
+    """
+
+    if not settings.debug:
+        raise HTTPException(
+            status_code=404,
+            detail="Not found",
+        )
+
+    role_map = {
+        "user": (
+            "aldi@ugm.ac.id",
+            "Aldi (Customer / Booker)",
+            "mock-user-aldi-123",
+        ),
+        "admin": (
+            "admin@ugm.ac.id",
+            "Admin SiRuangan",
+            "mock-user-admin-123",
+        ),
+        "approver": (
+            "approver@ugm.ac.id",
+            "Approver SiRuangan",
+            "mock-user-approver-123",
+        ),
+    }
+
+    if role not in role_map:
+        raise HTTPException(
+            status_code=422,
+            detail=(
+                "Role mock-login harus "
+                "user, admin, atau approver"
+            ),
+        )
+
+    email, name, sub = role_map[role]
+
+    selected_role = Role(role)
+
+    user = upsert_google_user(
+        email=email,
+        name=name,
+        picture=(
+            "https://ui-avatars.com/api/"
+            f"?name={name.replace(' ', '+')}"
+        ),
+        sub=sub,
+        role=selected_role,
     )
     session_cookie = encode_session(user)
     redirect_response = RedirectResponse(url="/app/dashboard")
