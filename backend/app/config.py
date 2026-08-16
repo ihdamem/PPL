@@ -13,14 +13,35 @@ class Settings(BaseSettings):
     google_credentials_file: str = "/app/credentials/google-login-credentials.json"
     cors_origins: str = "*"
     secure_cookies: bool = False
-    database_path: str = "./data/siruangan.db"
+    database_path: str = "/app/data/siruangan.db"
+    admin_emails: str = ""
+    approver_emails: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:
         if self.cors_origins == "*":
             return ["*"]
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        return [
+            origin.strip()
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
+    
+    @property
+    def admin_email_set(self) -> set[str]:
+        return {
+            email.strip().lower()
+            for email in self.admin_emails.split(",")
+            if email.strip()
+        }
 
+    @property
+    def approver_email_set(self) -> set[str]:
+        return {
+            email.strip().lower()
+            for email in self.approver_emails.split(",")
+            if email.strip()
+        }
 
 settings = Settings()
 
@@ -64,5 +85,6 @@ def load_google_credentials() -> GoogleCredentials:
             project_id=web.get("project_id"),
             auth_uri=web.get("auth_uri"),
             token_uri=web.get("token_uri"),
+            userinfo_uri=web.get("userinfo_uri"),
         )
     return GoogleCredentials(**data)
