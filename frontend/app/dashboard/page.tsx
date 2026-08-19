@@ -7,14 +7,20 @@ import { Button } from "@/components/ui/button";
 import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft, ShieldCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
 
+type UserRole = "user" | "admin" | "approver";
+
 type User = {
   email: string;
   name?: string;
   picture?: string;
   sub: string;
+  role: UserRole;
+  nomor_induk?: string | null;
+  departemen?: string | null;
+  created_at?: string | null;
 };
 
-const menuItems = [
+const customerMenuItems = [
   {
     icon: Calendar,
     title: "Booking Ruangan",
@@ -33,13 +39,35 @@ const menuItems = [
     desc: "Pantau status peminjaman yang pernah diajukan.",
     href: "/dashboard/booking/history",
   },
+];
+
+const adminMenuItems = [
   {
     icon: ShieldCheck,
     title: "Approval Peminjaman",
     desc: "Tinjau dan setujui/tolak pengajuan peminjaman ruangan.",
     href: "/dashboard/approval",
   },
+  {
+    icon: Building2,
+    title: "Kelola Ruangan",
+    desc: "Kelola data dan ketersediaan ruangan.",
+    href: "#",
+  },
+  {
+    icon: ClipboardList,
+    title: "Monitoring Booking",
+    desc: "Pantau seluruh pengajuan peminjaman ruangan.",
+    href: "/dashboard/booking/history",
+  },
 ];
+
+const profileMenuItem = {
+  icon: User,
+  title: "Profil Saya",
+  desc: "Kelola informasi profil akun.",
+  href: "/dashboard/profile",
+};
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -60,6 +88,25 @@ export default function DashboardPage() {
         router.replace("/");
       });
   }, [router]);
+
+  let menuItems: typeof customerMenuItems = [];
+
+  if (user) {
+    switch (user.role) {
+      case "admin":
+        menuItems = [...adminMenuItems, profileMenuItem];
+        break;
+
+      case "approver":
+        menuItems = [...adminMenuItems, profileMenuItem];
+        break;
+
+      case "user":
+      default:
+        menuItems = [...customerMenuItems, profileMenuItem];
+        break;
+    }
+  }
 
   const handleLogout = async () => {
     await fetch("/api/auth/logout", {
@@ -124,6 +171,13 @@ export default function DashboardPage() {
             <div>
               <h1 className="text-2xl font-bold md:text-3xl">Selamat datang, {user.name || user.email}</h1>
               <p className="text-slate-300">{user.email}</p>
+              <p className="mt-1 text-sm text-slate-400">
+                {user.role === "admin"
+                  ? "Admin"
+                  : user.role === "approver"
+                    ? "Approver"
+                    : "Customer / Booker"}
+              </p>
             </div>
           </div>
         </div>
