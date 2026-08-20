@@ -78,13 +78,17 @@ def load_google_credentials() -> GoogleCredentials:
     # Support both the raw downloaded format and a simplified format.
     if "web" in data:
         web = data["web"]
+        redirect_uris = web.get("redirect_uris") or [
+            "http://localhost:8085/api/auth/google/callback"
+        ]
         return GoogleCredentials(
             client_id=web["client_id"],
             client_secret=web["client_secret"],
-            redirect_uri=web.get("redirect_uris", [settings.google_credentials_file])[0],
+            redirect_uri=redirect_uris[0],
             project_id=web.get("project_id"),
-            auth_uri=web.get("auth_uri"),
-            token_uri=web.get("token_uri"),
-            userinfo_uri=web.get("userinfo_uri"),
+            auth_uri=web.get("auth_uri") or "https://accounts.google.com/o/oauth2/auth",
+            token_uri=web.get("token_uri") or "https://oauth2.googleapis.com/token",
+            userinfo_uri=web.get("userinfo_uri")
+            or "https://www.googleapis.com/oauth2/v1/userinfo",
         )
     return GoogleCredentials(**data)
