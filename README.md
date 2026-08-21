@@ -115,32 +115,37 @@ Pastikan URI tersebut didaftarkan di **Google Cloud Console > APIs & Services > 
 
 Sistem memiliki 3 role (`backend/app/models.py`): `user`, `admin`, dan `approver`. Sesuai persona di [`initial-plan.md`](initial-plan.md), **Admin merangkap sebagai penyetuju booking** — role `approver` di kode adalah pemisahan teknis tambahan untuk fleksibilitas ke depan, bukan persona terpisah di rencana awal. Keduanya (`admin` dan `approver`) sama-sama boleh approve/reject booking.
 
-### ⚠️ Status saat ini: belum ada pemetaan role otomatis
+### ✅ Status saat ini: ada pemetaan role otomatis via environment
 
-Saat user login lewat Google OAuth asli (`backend/app/auth.py`, endpoint `/auth/google/callback`), role **selalu default ke `user`** — tidak ada mekanisme untuk menjadikan seseorang admin/approver. Satu-satunya cara mendapat role `approver` saat ini adalah lewat endpoint `/auth/mock-login`, yang khusus untuk development lokal (bukan untuk produksi).
+Saat user login lewat Google OAuth (`/auth/google/callback`), role ditentukan berdasarkan email:
 
-Artinya: di server produksi sekarang, **belum ada seorang pun yang bisa membuka dashboard approval** lewat login Google asli.
+- Email yang tercantum di env `ADMIN_EMAILS` (comma-separated) → otomatis `admin`
+- Email yang tercantum di env `APPROVER_EMAILS` (comma-separated) → otomatis `approver`
+- Email lainnya → default `user`
+
+Semua email dinormalisasi ke lowercase sebelum dibandingkan. Gunakan domain `@mail.ugm.ac.id` (email mahasiswa UGM).
+
+Contoh konfigurasi di environment / `docker-compose.yml`:
+```
+ADMIN_EMAILS=aldiindrawan@mail.ugm.ac.id
+APPROVER_EMAILS=rima@mail.ugm.ac.id,prima@mail.ugm.ac.id
+```
+
+Endpoint `/auth/mock-login` tetap hanya untuk development lokal (`DEBUG=true`).
 
 ### Rencana implementasi (disepakati tim)
 
-Alih-alih form pilihan role saat login (rawan disalahgunakan — siapa pun bisa asal klik "admin"), dipakai model **super admin yang meng-assign role dari dalam aplikasi**:
+Role ditentukan otomatis berdasarkan email saat login Google OAuth. Konfigurasi dilakukan lewat environment variable `ADMIN_EMAILS` dan `APPROVER_EMAILS` (comma-separated, case-insensitive). Semua email harus menggunakan domain `@mail.ugm.ac.id`.
 
-1. **Default saat login pertama kali**: siapa pun yang login lewat Google (belum pernah login sebelumnya) otomatis dapat role `user` (peminjam).
-2. **1 super admin tetap**: ditentukan lewat satu email di konfigurasi environment variable `SUPER_ADMIN_EMAIL` (bukan role terpisah di database — orang ini otomatis dapat role `admin` plus kewenangan ekstra untuk mengelola role user lain). Default sementara: `aldi@ugm.ac.id` (identitas `mock-login` untuk memudahkan testing lokal) — **wajib diganti ke email asli saat deploy produksi**.
-3. **Super admin bisa assign role user lain** — naik jadi `admin` atau `approver`, atau turun lagi jadi `user` biasa — lewat halaman khusus di dashboard ("Kelola User"), bukan lewat env var per orang.
-4. Supaya ini bisa jalan, sistem perlu **menyimpan daftar user yang pernah login** (belum ada sebelumnya — sebelumnya data user cuma hidup sesaat, tidak pernah disimpan lintas sesi). Disimpan in-memory dulu (`backend/app/user_store.py`), konsisten dengan pola penyimpanan booking/audit/notifikasi yang sudah ada.
+Data user disimpan di database SQLite (`backend/data/siruangan.db`) via modul `backend/app/database.py`. Setiap login, user di-upsert (dibuat jika belum ada, di-update jika sudah ada).
 
-### Rencana teknis (belum diimplementasikan)
-
-| Bagian | Rencana |
+| Bagian | Status |
 |---|---|
-| `backend/app/config.py` | Tambah `super_admin_email` |
-| `backend/app/user_store.py` *(baru)* | `fake_users_db` (dict per email), `get_or_create_user()`, `is_super_admin()` |
-| `backend/app/users.py` *(baru)* | `GET /api/users` (daftar user, khusus super admin), `PATCH /api/users/{email}/role` (ubah role, khusus super admin) |
-| `backend/app/auth.py` | `google_callback` & `mock_login` pakai `get_or_create_user()` (role persisten, bukan dibuat ulang tiap login); `/auth/me` menyertakan flag `is_super_admin` |
-| Frontend | Halaman baru `dashboard/users` ("Kelola User"), menu ini cuma tampil kalau `is_super_admin === true` |
-
-Status: **belum diimplementasikan** — didokumentasikan di sini sebagai rencana yang sudah disepakati tim, sebelum dikerjakan.
+| `backend/app/config.py` | ✅ `admin_emails`, `approver_emails` dari env |
+| `backend/app/database.py` | ✅ SQLite user store, `upsert_google_user()`, `get_user_by_sub()` |
+| `backend/app/auth.py` | ✅ `role_for_email()` mapping otomatis, `google_callback` pakai upsert |
+| `backend/app/profile.py` | ✅ Profile router |
+| Frontend `dashboard/profile` | ✅ Halaman Profil Saya |
 
 ---
 
