@@ -24,3 +24,7 @@ backend/.pytest_cache/
 google-login-credentials.json
 *.json.key
 backend/.test-data/
+
+# Ignore e2e test folder
+e2e
+
