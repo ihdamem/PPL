@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, Tag, Info } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Tag, Info, X } from "lucide-react";
 import Link from "next/link";
 
 type Booking = {
@@ -18,6 +18,7 @@ type Booking = {
 export default function BookingHistoryPage() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedBooking, setSelectedBooking] = useState<Booking | null>(null);
 
   useEffect(() => {
     fetch("/api/bookings", { credentials: "include" })
@@ -116,15 +117,29 @@ export default function BookingHistoryPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 border-t border-border pt-4 md:border-0 md:pt-0">
-                  <Button variant="outline" size="sm" className="text-xs">
+                  <button onClick={() => setSelectedBooking(booking)} className="inline-block rounded-md border border-border bg-card px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50">
                     Lihat Detail
-                  </Button>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+      {selectedBooking && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedBooking(null)}>
+          <div className="relative bg-card p-6 rounded-lg w-full max-w-md" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-2 right-2 text-muted-foreground" onClick={() => setSelectedBooking(null)}>
+              <X className="size-5" />
+            </button>
+            <h2 className="text-xl font-bold mb-4">{selectedBooking.keperluan}</h2>
+            <p className="mb-2"><span className="font-semibold">Status:</span> {selectedBooking.status}</p>
+            <p className="mb-2"><span className="font-semibold">Tanggal:</span> {new Date(selectedBooking.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+            <p className="mb-2"><span className="font-semibold">Waktu:</span> {selectedBooking.waktu_mulai.slice(0,5)} - {selectedBooking.waktu_selesai.slice(0,5)}</p>
+            <p className="mb-2"><span className="font-semibold">ID:</span> #{selectedBooking.id}</p>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

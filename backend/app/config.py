@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings
 
 class Settings(BaseSettings):
     app_name: str = "SiRuangan Backend"
-    debug: bool = False
+    debug: bool = True
     secret_key: str = "dev-secret-change-me-in-production"
     session_cookie_name: str = "siruangan_session"
     google_credentials_file: str = "/app/credentials/google-login-credentials.json"
