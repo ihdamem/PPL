@@ -6,6 +6,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft, ShieldCheck } from "lucide-react";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { NotificationBell } from "@/components/notification-bell";
 
 type UserRole = "user" | "admin" | "approver";
 
@@ -42,6 +43,12 @@ const customerMenuItems = [
 ];
 
 const adminMenuItems = [
+  {
+    icon: User,
+    title: "Profil Saya",
+    desc: "Kelola informasi profil akun.",
+    href: "/dashboard/profile",
+  },
   {
     icon: ShieldCheck,
     title: "Approval Peminjaman",
@@ -136,6 +143,7 @@ export default function DashboardPage() {
             <span className="text-lg font-extrabold tracking-tight">SiRuangan</span>
           </Link>
           <div className="flex items-center gap-3">
+            <NotificationBell className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
             <ThemeToggle className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
             <Button
               variant="outline"

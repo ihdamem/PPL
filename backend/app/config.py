@@ -26,7 +26,7 @@ class Settings(BaseSettings):
             for origin in self.cors_origins.split(",")
             if origin.strip()
         ]
-    
+
     @property
     def admin_email_set(self) -> set[str]:
         return {

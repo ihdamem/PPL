@@ -56,3 +56,30 @@ class LoginUrlResponse(BaseModel):
 class TokenResponse(BaseModel):
     access_token: str
     token_type: str = "bearer"
+
+
+class AuditAction(str, Enum):
+    CREATE = "create"
+    APPROVE = "approve"
+    REJECT = "reject"
+
+
+class AuditLog(BaseModel):
+    id: int
+    booking_id: int
+    actor_id: str
+    actor_name: Optional[str] = None
+    action: AuditAction
+    old_status: Optional[BookingStatus] = None
+    new_status: BookingStatus
+    created_at: datetime
+
+
+class Notification(BaseModel):
+    id: int
+    booking_id: int
+    message: str
+    read: bool = False
+    created_at: datetime
+    user_id: Optional[str] = None
+    target_role: Optional[Role] = None
