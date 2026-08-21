@@ -2,8 +2,17 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
-from app.models import BookingCreate, BookingResponse, BookingStatus, AuditAction, User, Role
+from app.models import (
+    BookingCreate,
+    BookingResponse,
+    BookingStatus,
+    AuditAction,
+    RoomStatus,
+    User,
+    Role,
+)
 from app.auth import require_user
+from app.rooms_db import get_room
 from app.audit import record_audit
 from app.notifications import notify_user, notify_role
 
@@ -24,11 +33,52 @@ class ApprovalRequest(BaseModel):
 async def create_booking(booking: BookingCreate, current_user: User = Depends(require_user)):
     global booking_id_counter
 
-    # Server-side validation: Check if end time is after start time
+    # Validasi waktu: selesai harus setelah mulai.
     if booking.waktu_selesai <= booking.waktu_mulai:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Waktu selesai harus setelah waktu mulai"
+        )
+
+    # Validasi ruangan: harus ada dan tidak sedang maintenance.
+    room = get_room(booking.room_id)
+    if room is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Ruangan tidak ditemukan"
+        )
+    if room.status != RoomStatus.AVAILABLE:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=f"Ruangan '{room.name}' sedang maintenance dan tidak dapat dipesan"
+        )
+    if booking.jumlah_peserta > room.capacity:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=(
+                f"Jumlah peserta ({booking.jumlah_peserta}) melebihi "
+                f"kapasitas ruangan '{room.name}' ({room.capacity})"
+            )
+        )
+
+    # Deteksi konflik jadwal pada ruangan yang sama (pending/approved).
+    has_conflict = any(
+        b
+        for b in fake_bookings_db
+        if b.room_id == booking.room_id
+        and b.tanggal == booking.tanggal
+        and b.status in (BookingStatus.PENDING, BookingStatus.APPROVED)
+        and b.waktu_mulai < booking.waktu_selesai
+        and b.waktu_selesai > booking.waktu_mulai
+    )
+    if has_conflict:
+        raise HTTPException(
+            status_code=status.HTTP_409_CONFLICT,
+            detail=(
+                f"Ruangan '{room.name}' sudah dipesan pada "
+                f"{booking.tanggal} jam {booking.waktu_mulai.strftime('%H:%M')}-"
+                f"{booking.waktu_selesai.strftime('%H:%M')}"
+            )
         )
 
     # Create new booking with PENDING status
@@ -37,6 +87,7 @@ async def create_booking(booking: BookingCreate, current_user: User = Depends(re
         user_id=current_user.sub,
         status=BookingStatus.PENDING,
         created_at=datetime.now(),
+        room_name=room.name,
         **booking.model_dump()
     )
 
@@ -124,6 +175,26 @@ async def approve_or_reject_booking(
     old_status = booking.status
 
     if payload.action == "approve":
+        # Cegah dua booking overlap di ruangan sama keduanya approved.
+        conflict = any(
+            b
+            for b in fake_bookings_db
+            if b.id != booking.id
+            and b.room_id == booking.room_id
+            and b.tanggal == booking.tanggal
+            and b.status == BookingStatus.APPROVED
+            and b.waktu_mulai < booking.waktu_selesai
+            and b.waktu_selesai > booking.waktu_mulai
+        )
+        if conflict:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail=(
+                    "Terdapat booking lain yang sudah disetujui dan berbenturan "
+                    "dengan jadwal ini"
+                )
+            )
+
         booking.status = BookingStatus.APPROVED
         record_audit(
             booking_id=booking.id,

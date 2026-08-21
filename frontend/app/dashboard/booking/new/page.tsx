@@ -1,60 +1,45 @@
 "use client";
 
-import { Suspense, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, Calendar, Clock, Users, FileText, Send, Building2 } from "lucide-react";
 import Link from "next/link";
 
-const mockRooms = [
-  {
-    id: 1,
-    name: "Ruang A.1",
-    capacity: 25,
-    location: "Lantai 2, Gedung A",
-    facilities: ["Proyektor", "Whiteboard", "AC"],
-    status: "available",
-  },
-  {
-    id: 2,
-    name: "Ruang Seminar 1",
-    capacity: 60,
-    location: "Lantai 3, Gedung B",
-    facilities: ["Proyektor", "Audio", "Wi-Fi"],
-    status: "available",
-  },
-  {
-    id: 3,
-    name: "Ruang Sidang",
-    capacity: 15,
-    location: "Lantai 1, Gedung C",
-    facilities: ["LCD", "AC"],
-    status: "maintenance",
-  },
-  {
-    id: 4,
-    name: "Lab Komputer A",
-    capacity: 40,
-    location: "Lantai 2, Gedung Informatika",
-    facilities: ["PC", "Proyektor", "Whiteboard"],
-    status: "available",
-  },
-];
+type Room = {
+  id: number;
+  name: string;
+  location: string;
+  capacity: number;
+  facilities: string[];
+  status: string;
+};
 
 function BookingFormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [rooms, setRooms] = useState<Room[]>([]);
+  const [roomsLoading, setRoomsLoading] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const selectedRoomId = useMemo(() => {
-    const roomIdFromQuery = Number(searchParams.get("roomId") ?? "1");
-    return mockRooms.some((room) => room.id === roomIdFromQuery)
-      ? roomIdFromQuery
-      : mockRooms[0].id;
-  }, [searchParams]);
+  useEffect(() => {
+    // Hanya ruangan available yang bisa diajukan.
+    fetch("/api/rooms?status=available", { credentials: "include" })
+      .then((res) => (res.ok ? res.json() : []))
+      .then(setRooms)
+      .finally(() => setRoomsLoading(false));
+  }, []);
 
-  const selectedRoom = mockRooms.find((room) => room.id === selectedRoomId) ?? mockRooms[0];
+  const selectedRoomId = useMemo(() => {
+    if (rooms.length === 0) return null;
+    const roomIdFromQuery = Number(searchParams.get("roomId") ?? "");
+    return rooms.some((room) => room.id === roomIdFromQuery)
+      ? roomIdFromQuery
+      : rooms[0].id;
+  }, [searchParams, rooms]);
+
+  const selectedRoom = rooms.find((room) => room.id === selectedRoomId) ?? null;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -103,7 +88,7 @@ function BookingFormContent() {
     }
 
     const data = {
-      room_id: selectedRoom.id,
+      room_id: selectedRoom?.id,
       tanggal: formData.get("tanggal"),
       waktu_mulai: waktuMulai,
       waktu_selesai: waktuSelesai,
@@ -155,20 +140,36 @@ function BookingFormContent() {
               <Building2 className="size-4 text-muted-foreground" />
               Ruangan dipilih
             </div>
-            <div className="flex items-center justify-between gap-4">
-              <div>
-                <p className="font-medium text-foreground">{selectedRoom.name}</p>
+            {roomsLoading ? (
+              <p className="text-sm text-muted-foreground">Memuat daftar ruangan…</p>
+            ) : !selectedRoom ? (
+              <div className="flex items-center justify-between gap-4">
                 <p className="text-sm text-muted-foreground">
-                  {selectedRoom.location} • Kapasitas {selectedRoom.capacity} orang
+                  Tidak ada ruangan yang tersedia saat ini.
                 </p>
+                <Link
+                  href="/dashboard/rooms"
+                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  Lihat Ruangan
+                </Link>
               </div>
-              <Link
-                href="/dashboard/rooms"
-                className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
-              >
-                Ganti Ruangan
-              </Link>
-            </div>
+            ) : (
+              <div className="flex items-center justify-between gap-4">
+                <div>
+                  <p className="font-medium text-foreground">{selectedRoom.name}</p>
+                  <p className="text-sm text-muted-foreground">
+                    {selectedRoom.location} • Kapasitas {selectedRoom.capacity} orang
+                  </p>
+                </div>
+                <Link
+                  href="/dashboard/rooms"
+                  className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+                >
+                  Ganti Ruangan
+                </Link>
+              </div>
+            )}
           </div>
 
           {error && (
@@ -264,7 +265,7 @@ function BookingFormContent() {
 
             <Button
               type="submit"
-              disabled={loading}
+              disabled={loading || roomsLoading || !selectedRoom}
               className="w-full bg-ugm-dark text-white hover:bg-ugm-dark/90"
             >
               {loading ? (

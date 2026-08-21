@@ -9,8 +9,11 @@ from app.notifications import router as notifications_router
 from app.database import init_db
 from app.profile import router as profile_router
 from app.admin import router as admin_router
+from app.rooms import router as rooms_router
+from app.rooms_db import init_rooms_table
 
 init_db()
+init_rooms_table()
 
 app = FastAPI(
     title=settings.app_name,
@@ -33,6 +36,7 @@ app.include_router(audit_router, prefix="/api")
 app.include_router(notifications_router, prefix="/api")
 app.include_router(profile_router, prefix="/api")
 app.include_router(admin_router, prefix="/api")
+app.include_router(rooms_router, prefix="/api")
 
 @app.get("/health")
 async def health():

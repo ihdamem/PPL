@@ -9,6 +9,7 @@ type Booking = {
   id: number;
   user_id: string;
   room_id: number;
+  room_name?: string | null;
   tanggal: string;
   waktu_mulai: string;
   waktu_selesai: string;
@@ -127,7 +128,7 @@ export default function ApprovalDashboardPage() {
                     <div className="grid grid-cols-2 gap-x-8 gap-y-2 text-sm text-muted-foreground">
                       <div className="flex items-center gap-2">
                         <Info className="size-4 text-muted-foreground" />
-                        <span>Ruangan ID: {booking.room_id}</span>
+                        <span>Ruangan: {booking.room_name ?? `ID ${booking.room_id}`}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Info className="size-4 text-muted-foreground" />
