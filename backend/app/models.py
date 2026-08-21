@@ -51,9 +51,38 @@ class BookingResponse(BookingCreate):
     user_id: str
     status: BookingStatus
     created_at: datetime
+    room_name: Optional[str] = None
 
     class Config:
         from_attributes = True
+
+
+class RoomStatus(str, Enum):
+    AVAILABLE = "available"
+    MAINTENANCE = "maintenance"
+
+
+class RoomCreate(BaseModel):
+    name: str = Field(..., min_length=3, max_length=100)
+    location: str = Field(..., min_length=3, max_length=150)
+    capacity: int = Field(..., gt=0)
+    facilities: List[str] = Field(default_factory=list)
+    description: Optional[str] = None
+    status: RoomStatus = RoomStatus.AVAILABLE
+
+
+class RoomUpdate(BaseModel):
+    name: Optional[str] = Field(None, min_length=3, max_length=100)
+    location: Optional[str] = Field(None, min_length=3, max_length=150)
+    capacity: Optional[int] = Field(None, gt=0)
+    facilities: Optional[List[str]] = None
+    description: Optional[str] = None
+    status: Optional[RoomStatus] = None
+
+
+class RoomResponse(RoomCreate):
+    id: int
+    created_at: datetime
 
 
 class LoginUrlResponse(BaseModel):

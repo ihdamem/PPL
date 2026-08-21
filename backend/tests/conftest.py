@@ -45,10 +45,19 @@ def db():
 
 @pytest.fixture()
 def client(db):
-    """TestClient FastAPI dengan mock-login helper."""
+    """TestClient FastAPI dengan mock-login helper.
+
+    Tabel rooms di-drop & seed ulang supaya tiap test mulai dari seed standar.
+    """
 
     from fastapi.testclient import TestClient
+    from app.database import get_connection
     from app.main import app
+    from app.rooms_db import init_rooms_table
+
+    with get_connection() as connection:
+        connection.execute("DROP TABLE IF EXISTS rooms")
+    init_rooms_table()
 
     with TestClient(app) as test_client:
         yield test_client
@@ -67,7 +76,7 @@ def login_as(client, role: str):
     return me.json()
 
 
-@pytest.fixture()
+@pytest.fixture(autouse=True)
 def reset_memory():
     """Kosongkan state in-memory (booking, audit, notifikasi) antar test."""
 
