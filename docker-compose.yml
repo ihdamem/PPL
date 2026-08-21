@@ -34,8 +34,7 @@ services:
       - DATABASE_PATH=/app/data/siruangan.db
       - SECRET_KEY=${SECRET_KEY:-dev-secret-change-me-in-production}
       - DEBUG=${DEBUG:-false}
-      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
-      - APPROVER_EMAILS=${APPROVER_EMAILS:-}
+      - SUPERADMIN_EMAILS=${SUPERADMIN_EMAILS:-primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id}
       - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:8085}
       - SECURE_COOKIES=${SECURE_COOKIES:-false}
     networks:

@@ -113,39 +113,42 @@ Pastikan URI tersebut didaftarkan di **Google Cloud Console > APIs & Services > 
 
 ## 🔑 Manajemen Role & Akses
 
-Sistem memiliki 3 role (`backend/app/models.py`): `user`, `admin`, dan `approver`. Sesuai persona di [`initial-plan.md`](initial-plan.md), **Admin merangkap sebagai penyetuju booking** — role `approver` di kode adalah pemisahan teknis tambahan untuk fleksibilitas ke depan, bukan persona terpisah di rencana awal. Keduanya (`admin` dan `approver`) sama-sama boleh approve/reject booking.
+Sistem memiliki 3 role (`backend/app/models.py`): `booker`, `admin`, dan `superadmin`.
 
-### ✅ Status saat ini: ada pemetaan role otomatis via environment
+| Role | Hak akses |
+|------|-----------|
+| `booker` | Mengajukan booking, melihat riwayat, membatalkan pengajuan |
+| `admin` | Semua ability booker + kelola ruangan + approve/reject booking |
+| `superadmin` | Semua ability admin + mengelola role user (promosi/demosi admin) |
+
+### Pemetaan role saat login
 
 Saat user login lewat Google OAuth (`/auth/google/callback`), role ditentukan berdasarkan email:
 
-- Email yang tercantum di env `ADMIN_EMAILS` (comma-separated) → otomatis `admin`
-- Email yang tercantum di env `APPROVER_EMAILS` (comma-separated) → otomatis `approver`
-- Email lainnya → default `user`
+- Email yang tercantum di env `SUPERADMIN_EMAILS` (comma-separated) → otomatis `superadmin`
+- Email lainnya → default `booker`
+
+Admin tambahan ditunjuk oleh **superadmin** lewat halaman **Kelola User** (`/app/dashboard/admin/users`).
+
+Default superadmin (hardcoded di `docker-compose.yml`, bisa dioverride via env):
+
+```
+SUPERADMIN_EMAILS=primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id
+```
 
 Semua email dinormalisasi ke lowercase sebelum dibandingkan. Gunakan domain `@mail.ugm.ac.id` (email mahasiswa UGM).
 
-Contoh konfigurasi di environment / `docker-compose.yml`:
-```
-ADMIN_EMAILS=aldiindrawan@mail.ugm.ac.id
-APPROVER_EMAILS=rima@mail.ugm.ac.id,prima@mail.ugm.ac.id
-```
+Endpoint `/auth/mock-login` tetap hanya untuk development lokal (`DEBUG=true`) dengan role `booker`, `admin`, atau `superadmin`.
 
-Endpoint `/auth/mock-login` tetap hanya untuk development lokal (`DEBUG=true`).
-
-### Rencana implementasi (disepakati tim)
-
-Role ditentukan otomatis berdasarkan email saat login Google OAuth. Konfigurasi dilakukan lewat environment variable `ADMIN_EMAILS` dan `APPROVER_EMAILS` (comma-separated, case-insensitive). Semua email harus menggunakan domain `@mail.ugm.ac.id`.
-
-Data user disimpan di database SQLite (`backend/data/siruangan.db`) via modul `backend/app/database.py`. Setiap login, user di-upsert (dibuat jika belum ada, di-update jika sudah ada).
+Data user disimpan di database SQLite (volume Docker `siruangan-data`) via modul `backend/app/database.py`. Setiap login, user di-upsert (dibuat jika belum ada, di-update jika sudah ada). Role lama (`user`, `approver`) dari data lama otomatis dipetakan ke `booker` dan `admin`.
 
 | Bagian | Status |
 |---|---|
-| `backend/app/config.py` | ✅ `admin_emails`, `approver_emails` dari env |
-| `backend/app/database.py` | ✅ SQLite user store, `upsert_google_user()`, `get_user_by_sub()` |
+| `backend/app/config.py` | ✅ `superadmin_emails` dari env (default 2 email superadmin) |
+| `backend/app/database.py` | ✅ SQLite user store, `list_users()`, `update_user_role()` |
 | `backend/app/auth.py` | ✅ `role_for_email()` mapping otomatis, `google_callback` pakai upsert |
-| `backend/app/profile.py` | ✅ Profile router |
-| Frontend `dashboard/profile` | ✅ Halaman Profil Saya |
+| `backend/app/admin.py` | ✅ Endpoint kelola user (khusus superadmin) |
+| Frontend `dashboard/admin/users` | ✅ Halaman Kelola User (khusus superadmin) |
 
 ---
 

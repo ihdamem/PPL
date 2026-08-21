@@ -5,9 +5,16 @@ from enum import Enum
 
 
 class Role(str, Enum):
-    USER = "user"
+    BOOKER = "booker"
     ADMIN = "admin"
-    APPROVER = "approver"
+    SUPERADMIN = "superadmin"
+
+
+# Map nilai role lama (sebelum refactor) ke role baru.
+LEGACY_ROLE_MAP = {
+    "user": Role.BOOKER,
+    "approver": Role.ADMIN,
+}
 
 
 class User(BaseModel):
@@ -15,7 +22,7 @@ class User(BaseModel):
     name: Optional[str] = None
     picture: Optional[str] = None
     sub: str
-    role: Role = Role.USER
+    role: Role = Role.BOOKER
 
     # Profile fields
     nomor_induk: Optional[str] = None

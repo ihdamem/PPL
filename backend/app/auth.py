@@ -63,13 +63,10 @@ def _set_cookie(response: Response, key: str, value: str, max_age: int) -> None:
 def role_for_email(email: str) -> Role:
     normalized = email.strip().lower()
 
-    if normalized in settings.admin_email_set:
-        return Role.ADMIN
+    if normalized in settings.superadmin_email_set:
+        return Role.SUPERADMIN
 
-    if normalized in settings.approver_email_set:
-        return Role.APPROVER
-
-    return Role.USER
+    return Role.BOOKER
 
 @router.get("/google")
 async def login_with_google():
@@ -158,9 +155,9 @@ async def mock_login(
     """
     Development-only login helper.
 
-    /api/auth/mock-login?role=user
+    /api/auth/mock-login?role=booker
     /api/auth/mock-login?role=admin
-    /api/auth/mock-login?role=approver
+    /api/auth/mock-login?role=superadmin
     """
 
     if not settings.debug:
@@ -170,7 +167,7 @@ async def mock_login(
         )
 
     role_map = {
-        "user": (
+        "booker": (
             "aldi@ugm.ac.id",
             "Aldi (Customer / Booker)",
             "mock-user-aldi-123",
@@ -180,10 +177,10 @@ async def mock_login(
             "Admin SiRuangan",
             "mock-user-admin-123",
         ),
-        "approver": (
-            "approver@ugm.ac.id",
-            "Approver SiRuangan",
-            "mock-user-approver-123",
+        "superadmin": (
+            "superadmin@ugm.ac.id",
+            "Superadmin SiRuangan",
+            "mock-user-superadmin-123",
         ),
     }
 
@@ -192,7 +189,7 @@ async def mock_login(
             status_code=422,
             detail=(
                 "Role mock-login harus "
-                "user, admin, atau approver"
+                "booker, admin, atau superadmin"
             ),
         )
 

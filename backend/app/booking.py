@@ -51,7 +51,7 @@ async def create_booking(booking: BookingCreate, current_user: User = Depends(re
         new_status=new_booking.status,
     )
     pemohon = current_user.name or current_user.email
-    for role in (Role.APPROVER, Role.ADMIN):
+    for role in (Role.ADMIN, Role.SUPERADMIN):
         notify_role(
             role,
             booking_id=new_booking.id,
@@ -64,7 +64,7 @@ async def create_booking(booking: BookingCreate, current_user: User = Depends(re
 @router.get("", response_model=List[BookingResponse])
 async def get_bookings(current_user: User = Depends(require_user)):
     # If admin or approver, return all bookings
-    if current_user.role in [Role.ADMIN, Role.APPROVER]:
+    if current_user.role in [Role.ADMIN, Role.SUPERADMIN]:
         return fake_bookings_db
 
     # If regular user, return only their bookings
@@ -75,10 +75,10 @@ async def get_bookings(current_user: User = Depends(require_user)):
 @router.get("/pending", response_model=List[BookingResponse])
 async def get_pending_bookings(current_user: User = Depends(require_user)):
     """Hanya approver/admin yang bisa melihat semua booking pending."""
-    if current_user.role not in [Role.ADMIN, Role.APPROVER]:
+    if current_user.role not in [Role.ADMIN, Role.SUPERADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Hanya approver atau admin yang dapat mengakses halaman ini"
+            detail="Hanya admin yang dapat mengakses halaman ini"
         )
     pending = [b for b in fake_bookings_db if b.status == BookingStatus.PENDING]
     return pending
@@ -92,7 +92,7 @@ async def get_booking_detail(booking_id: int, current_user: User = Depends(requi
         raise HTTPException(status_code=404, detail="Booking tidak ditemukan")
 
     # User biasa hanya bisa lihat booking miliknya sendiri
-    if current_user.role == Role.USER and booking.user_id != current_user.sub:
+    if current_user.role == Role.BOOKER and booking.user_id != current_user.sub:
         raise HTTPException(status_code=403, detail="Akses ditolak")
 
     return booking
@@ -105,10 +105,10 @@ async def approve_or_reject_booking(
     current_user: User = Depends(require_user)
 ):
     """Approver/admin bisa approve atau reject booking."""
-    if current_user.role not in [Role.ADMIN, Role.APPROVER]:
+    if current_user.role not in [Role.ADMIN, Role.SUPERADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Hanya approver atau admin yang dapat melakukan approval"
+            detail="Hanya admin yang dapat melakukan approval"
         )
 
     booking = next((b for b in fake_bookings_db if b.id == booking_id), None)

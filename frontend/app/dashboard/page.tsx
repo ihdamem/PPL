@@ -8,7 +8,7 @@ import { LogOut, Calendar, Building2, ClipboardList, User, ArrowLeft, ShieldChec
 import { ThemeToggle } from "@/components/theme-toggle";
 import { NotificationBell } from "@/components/notification-bell";
 
-type UserRole = "user" | "admin" | "approver";
+type UserRole = "booker" | "admin" | "superadmin";
 
 type User = {
   email: string;
@@ -69,6 +69,15 @@ const adminMenuItems = [
   },
 ];
 
+const superadminMenuItems = [
+  {
+    icon: ShieldCheck,
+    title: "Kelola User",
+    desc: "Jadikan user sebagai admin atau booker.",
+    href: "/dashboard/admin/users",
+  },
+];
+
 const profileMenuItem = {
   icon: User,
   title: "Profil Saya",
@@ -104,11 +113,11 @@ export default function DashboardPage() {
         menuItems = [...adminMenuItems, profileMenuItem];
         break;
 
-      case "approver":
-        menuItems = [...adminMenuItems, profileMenuItem];
+      case "superadmin":
+        menuItems = [...adminMenuItems, ...superadminMenuItems, profileMenuItem];
         break;
 
-      case "user":
+      case "booker":
       default:
         menuItems = [...customerMenuItems, profileMenuItem];
         break;
@@ -180,11 +189,11 @@ export default function DashboardPage() {
               <h1 className="text-2xl font-bold md:text-3xl">Selamat datang, {user.name || user.email}</h1>
               <p className="text-slate-300">{user.email}</p>
               <p className="mt-1 text-sm text-slate-400">
-                {user.role === "admin"
-                  ? "Admin"
-                  : user.role === "approver"
-                    ? "Approver"
-                    : "Customer / Booker"}
+                {user.role === "superadmin"
+                  ? "Superadmin"
+                  : user.role === "admin"
+                    ? "Admin"
+                    : "Booker"}
               </p>
             </div>
           </div>

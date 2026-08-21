@@ -35,10 +35,10 @@ def record_audit(
 
 
 def _require_staff(current_user: User) -> None:
-    if current_user.role not in [Role.ADMIN, Role.APPROVER]:
+    if current_user.role not in [Role.ADMIN, Role.SUPERADMIN]:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="Hanya approver atau admin yang dapat mengakses audit log",
+            detail="Hanya admin yang dapat mengakses audit log",
         )
 
 
