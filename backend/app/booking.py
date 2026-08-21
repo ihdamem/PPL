@@ -2,8 +2,10 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from typing import List, Optional
 from datetime import datetime
 from pydantic import BaseModel
-from app.models import BookingCreate, BookingResponse, BookingStatus, User, Role
+from app.models import BookingCreate, BookingResponse, BookingStatus, AuditAction, User, Role
 from app.auth import require_user
+from app.audit import record_audit
+from app.notifications import notify_user, notify_role
 
 router = APIRouter(prefix="/bookings", tags=["bookings"])
 
@@ -40,6 +42,21 @@ async def create_booking(booking: BookingCreate, current_user: User = Depends(re
 
     fake_bookings_db.append(new_booking)
     booking_id_counter += 1
+
+    record_audit(
+        booking_id=new_booking.id,
+        actor=current_user,
+        action=AuditAction.CREATE,
+        old_status=None,
+        new_status=new_booking.status,
+    )
+    pemohon = current_user.name or current_user.email
+    for role in (Role.APPROVER, Role.ADMIN):
+        notify_role(
+            role,
+            booking_id=new_booking.id,
+            message=f"Pengajuan baru dari {pemohon}: {new_booking.keperluan}",
+        )
 
     return new_booking
 
@@ -104,8 +121,22 @@ async def approve_or_reject_booking(
             detail=f"Booking sudah diproses dengan status: {booking.status}"
         )
 
+    old_status = booking.status
+
     if payload.action == "approve":
         booking.status = BookingStatus.APPROVED
+        record_audit(
+            booking_id=booking.id,
+            actor=current_user,
+            action=AuditAction.APPROVE,
+            old_status=old_status,
+            new_status=booking.status,
+        )
+        notify_user(
+            booking.user_id,
+            booking_id=booking.id,
+            message=f"Booking \"{booking.keperluan}\" telah disetujui.",
+        )
     elif payload.action == "reject":
         if not payload.alasan_penolakan:
             raise HTTPException(
@@ -113,11 +144,18 @@ async def approve_or_reject_booking(
                 detail="Alasan penolakan harus diisi"
             )
         booking.status = BookingStatus.REJECTED
-        # Simpan alasan penolakan (jika ada)
-        # Dalam implementasi nyata, ini mungkin disimpan di field terpisah atau log
-        # Untuk contoh ini, kita tidak punya field khusus untuk alasan penolakan di BookingResponse
-        # Jadi, kita hanya akan mencatatnya di log atau mengembalikannya jika API mengizinkan
-        print(f"Booking {booking_id} ditolak karena: {payload.alasan_penolakan}")
+        record_audit(
+            booking_id=booking.id,
+            actor=current_user,
+            action=AuditAction.REJECT,
+            old_status=old_status,
+            new_status=booking.status,
+        )
+        notify_user(
+            booking.user_id,
+            booking_id=booking.id,
+            message=f"Booking \"{booking.keperluan}\" ditolak: {payload.alasan_penolakan}",
+        )
     else:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,

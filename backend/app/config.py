@@ -13,13 +13,35 @@ class Settings(BaseSettings):
     google_credentials_file: str = "/app/credentials/google-login-credentials.json"
     cors_origins: str = "*"
     secure_cookies: bool = False
+    database_path: str = "/app/data/siruangan.db"
+    admin_emails: str = ""
+    approver_emails: str = ""
 
     @property
     def cors_origins_list(self) -> list[str]:
         if self.cors_origins == "*":
             return ["*"]
-        return [origin.strip() for origin in self.cors_origins.split(",")]
+        return [
+            origin.strip()
+            for origin in self.cors_origins.split(",")
+            if origin.strip()
+        ]
 
+    @property
+    def admin_email_set(self) -> set[str]:
+        return {
+            email.strip().lower()
+            for email in self.admin_emails.split(",")
+            if email.strip()
+        }
+
+    @property
+    def approver_email_set(self) -> set[str]:
+        return {
+            email.strip().lower()
+            for email in self.approver_emails.split(",")
+            if email.strip()
+        }
 
 settings = Settings()
 
@@ -56,12 +78,17 @@ def load_google_credentials() -> GoogleCredentials:
     # Support both the raw downloaded format and a simplified format.
     if "web" in data:
         web = data["web"]
+        redirect_uris = web.get("redirect_uris") or [
+            "http://localhost:8085/api/auth/google/callback"
+        ]
         return GoogleCredentials(
             client_id=web["client_id"],
             client_secret=web["client_secret"],
-            redirect_uri=web.get("redirect_uris", [settings.google_credentials_file])[0],
+            redirect_uri=redirect_uris[0],
             project_id=web.get("project_id"),
-            auth_uri=web.get("auth_uri"),
-            token_uri=web.get("token_uri"),
+            auth_uri=web.get("auth_uri") or "https://accounts.google.com/o/oauth2/auth",
+            token_uri=web.get("token_uri") or "https://oauth2.googleapis.com/token",
+            userinfo_uri=web.get("userinfo_uri")
+            or "https://www.googleapis.com/oauth2/v1/userinfo",
         )
     return GoogleCredentials(**data)

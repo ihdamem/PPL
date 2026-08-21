@@ -1,15 +1,60 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useMemo, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Calendar, Clock, Users, FileText, Send } from "lucide-react";
+import { ArrowLeft, Calendar, Clock, Users, FileText, Send, Building2 } from "lucide-react";
 import Link from "next/link";
 
-export default function NewBookingPage() {
+const mockRooms = [
+  {
+    id: 1,
+    name: "Ruang A.1",
+    capacity: 25,
+    location: "Lantai 2, Gedung A",
+    facilities: ["Proyektor", "Whiteboard", "AC"],
+    status: "available",
+  },
+  {
+    id: 2,
+    name: "Ruang Seminar 1",
+    capacity: 60,
+    location: "Lantai 3, Gedung B",
+    facilities: ["Proyektor", "Audio", "Wi-Fi"],
+    status: "available",
+  },
+  {
+    id: 3,
+    name: "Ruang Sidang",
+    capacity: 15,
+    location: "Lantai 1, Gedung C",
+    facilities: ["LCD", "AC"],
+    status: "maintenance",
+  },
+  {
+    id: 4,
+    name: "Lab Komputer A",
+    capacity: 40,
+    location: "Lantai 2, Gedung Informatika",
+    facilities: ["PC", "Proyektor", "Whiteboard"],
+    status: "available",
+  },
+];
+
+function BookingFormContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  const selectedRoomId = useMemo(() => {
+    const roomIdFromQuery = Number(searchParams.get("roomId") ?? "1");
+    return mockRooms.some((room) => room.id === roomIdFromQuery)
+      ? roomIdFromQuery
+      : mockRooms[0].id;
+  }, [searchParams]);
+
+  const selectedRoom = mockRooms.find((room) => room.id === selectedRoomId) ?? mockRooms[0];
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -58,7 +103,7 @@ export default function NewBookingPage() {
     }
 
     const data = {
-      room_id: 1, // Hardcoded for now, will come from room selection page
+      room_id: selectedRoom.id,
       tanggal: formData.get("tanggal"),
       waktu_mulai: waktuMulai,
       waktu_selesai: waktuSelesai,
@@ -103,6 +148,27 @@ export default function NewBookingPage() {
           <div className="mb-8">
             <h1 className="text-2xl font-bold text-foreground">Form Peminjaman Ruangan</h1>
             <p className="text-muted-foreground">Isi detail peminjaman ruangan di bawah ini.</p>
+          </div>
+
+          <div className="mb-6 rounded-xl border border-border bg-muted/30 p-4">
+            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-foreground">
+              <Building2 className="size-4 text-muted-foreground" />
+              Ruangan dipilih
+            </div>
+            <div className="flex items-center justify-between gap-4">
+              <div>
+                <p className="font-medium text-foreground">{selectedRoom.name}</p>
+                <p className="text-sm text-muted-foreground">
+                  {selectedRoom.location} • Kapasitas {selectedRoom.capacity} orang
+                </p>
+              </div>
+              <Link
+                href="/dashboard/rooms"
+                className="rounded-lg border border-border px-3 py-2 text-sm font-medium text-foreground hover:bg-muted"
+              >
+                Ganti Ruangan
+              </Link>
+            </div>
           </div>
 
           {error && (
@@ -214,5 +280,13 @@ export default function NewBookingPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function NewBookingPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-background p-6" /> }>
+      <BookingFormContent />
+    </Suspense>
   );
 }

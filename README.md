@@ -47,6 +47,24 @@ Akses aplikasi di `http://localhost:8085`:
 
 ---
 
+## ✅ Status Implementasi
+
+Dibandingkan dengan requirement di [`initial-plan.md`](initial-plan.md):
+
+| Fitur | Status |
+|---|---|
+| Autentikasi (Google OAuth + `mock-login` untuk development) | ✅ Selesai |
+| Pengajuan booking, riwayat, dan approval (approve/reject + alasan penolakan) | ✅ Selesai |
+| Audit log (FR-10) — mencatat setiap aksi create/approve/reject | ✅ Selesai (`backend/app/audit.py`) |
+| Notifikasi dalam aplikasi — ikon lonceng di dashboard | ✅ Selesai (`backend/app/notifications.py`, `frontend/components/notification-bell.tsx`) |
+| Dark mode | ✅ Selesai |
+| Notifikasi email (FR-08) | ❌ Belum — butuh kredensial layanan email (SMTP/SendGrid dsb.) |
+| Pemetaan role otomatis untuk login Google asli | ❌ Belum — lihat bagian [Manajemen Role & Akses](#-manajemen-role--akses) |
+| Manajemen ruangan / CRUD room | ❌ Belum diimplementasikan |
+| Deteksi konflik jadwal otomatis (FR-06) | ❌ Belum diimplementasikan |
+
+---
+
 ## 🗂️ Struktur Repositori
 
 ```
@@ -90,6 +108,44 @@ Ubah `redirect_uri` sesuai domain/server:
 - Produksi: `https://your-domain/api/auth/google/callback`
 
 Pastikan URI tersebut didaftarkan di **Google Cloud Console > APIs & Services > Credentials > OAuth 2.0 Client IDs**.
+
+---
+
+## 🔑 Manajemen Role & Akses
+
+Sistem memiliki 3 role (`backend/app/models.py`): `user`, `admin`, dan `approver`. Sesuai persona di [`initial-plan.md`](initial-plan.md), **Admin merangkap sebagai penyetuju booking** — role `approver` di kode adalah pemisahan teknis tambahan untuk fleksibilitas ke depan, bukan persona terpisah di rencana awal. Keduanya (`admin` dan `approver`) sama-sama boleh approve/reject booking.
+
+### ✅ Status saat ini: ada pemetaan role otomatis via environment
+
+Saat user login lewat Google OAuth (`/auth/google/callback`), role ditentukan berdasarkan email:
+
+- Email yang tercantum di env `ADMIN_EMAILS` (comma-separated) → otomatis `admin`
+- Email yang tercantum di env `APPROVER_EMAILS` (comma-separated) → otomatis `approver`
+- Email lainnya → default `user`
+
+Semua email dinormalisasi ke lowercase sebelum dibandingkan. Gunakan domain `@mail.ugm.ac.id` (email mahasiswa UGM).
+
+Contoh konfigurasi di environment / `docker-compose.yml`:
+```
+ADMIN_EMAILS=aldiindrawan@mail.ugm.ac.id
+APPROVER_EMAILS=rima@mail.ugm.ac.id,prima@mail.ugm.ac.id
+```
+
+Endpoint `/auth/mock-login` tetap hanya untuk development lokal (`DEBUG=true`).
+
+### Rencana implementasi (disepakati tim)
+
+Role ditentukan otomatis berdasarkan email saat login Google OAuth. Konfigurasi dilakukan lewat environment variable `ADMIN_EMAILS` dan `APPROVER_EMAILS` (comma-separated, case-insensitive). Semua email harus menggunakan domain `@mail.ugm.ac.id`.
+
+Data user disimpan di database SQLite (`backend/data/siruangan.db`) via modul `backend/app/database.py`. Setiap login, user di-upsert (dibuat jika belum ada, di-update jika sudah ada).
+
+| Bagian | Status |
+|---|---|
+| `backend/app/config.py` | ✅ `admin_emails`, `approver_emails` dari env |
+| `backend/app/database.py` | ✅ SQLite user store, `upsert_google_user()`, `get_user_by_sub()` |
+| `backend/app/auth.py` | ✅ `role_for_email()` mapping otomatis, `google_callback` pakai upsert |
+| `backend/app/profile.py` | ✅ Profile router |
+| Frontend `dashboard/profile` | ✅ Halaman Profil Saya |
 
 ---
 

@@ -70,6 +70,18 @@ rsync -avz --delete \
 
 echo "==> Running docker compose up -d --build ..."
 "$SSH_WRAPPER" "${SSH_USER}@${SSH_HOST}" \
-  "cd ${REMOTE_DIR} && docker compose up -d --build && docker compose ps && curl -sf --max-time 10 http://localhost:8085/health"
+  "cd ${REMOTE_DIR} && docker compose up -d --build && docker compose ps && \
+   for i in \$(seq 1 15); do \
+     if curl -fsS --max-time 10 http://localhost:8085/health >/dev/null; then \
+       echo 'Health check passed'; \
+       break; \
+     fi; \
+     if [ \"\$i\" -eq 15 ]; then \
+       echo 'ERROR: Health check failed after 15 attempts.' >&2; \
+       exit 1; \
+     fi; \
+     echo \"Health check attempt \$i failed. Retrying in 2s...\"; \
+     sleep 2; \
+   done"
 
 echo "==> Deploy finished. App should be available at http://localhost:8085 on the server."
