@@ -138,7 +138,7 @@ export default function ManageUsersPage() {
     return (
       <main className="flex min-h-screen flex-col items-center justify-center gap-4 bg-ugm-dark text-white">
         <p className="text-slate-300">{error}</p>
-        <Button variant="outline" asChild className="border-white/20 text-white hover:bg-white/10 hover:text-white">
+        <Button variant="outline" asChild className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white">
           <Link href="/dashboard">Kembali ke Dashboard</Link>
         </Button>
       </main>
@@ -161,7 +161,7 @@ export default function ManageUsersPage() {
               variant="outline"
               size="sm"
               asChild
-              className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <Link href="/dashboard">
                 <ArrowLeft className="mr-1 size-4" />

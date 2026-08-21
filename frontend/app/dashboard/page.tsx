@@ -152,13 +152,13 @@ export default function DashboardPage() {
             <span className="text-lg font-extrabold tracking-tight">SiRuangan</span>
           </Link>
           <div className="flex items-center gap-3">
-            <NotificationBell className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
-            <ThemeToggle className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
+            <NotificationBell className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" />
+            <ThemeToggle className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" />
             <Button
               variant="outline"
               size="sm"
               asChild
-              className="border-white/20 text-white hover:bg-white/10 hover:text-white"
+              className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white"
             >
               <a href="/">
                 <ArrowLeft className="mr-1 size-4" />

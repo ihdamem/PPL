@@ -219,7 +219,7 @@ export default function ProfilePage() {
             </span>
           </Link>
 
-          <ThemeToggle className="border-white/20 text-white hover:bg-white/10 hover:text-white" />
+          <ThemeToggle className="border-white/20 bg-transparent text-white hover:bg-white/10 hover:text-white" />
         </div>
       </header>
 
