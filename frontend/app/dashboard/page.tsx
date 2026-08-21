@@ -31,7 +31,7 @@ const customerMenuItems = [
     icon: Building2,
     title: "Daftar Ruangan",
     desc: "Cek ketersediaan dan fasilitas ruangan kampus.",
-    href: "#",
+    href: "/dashboard/rooms",
   },
   {
     icon: ClipboardList,
@@ -52,7 +52,7 @@ const adminMenuItems = [
     icon: Building2,
     title: "Kelola Ruangan",
     desc: "Kelola data dan ketersediaan ruangan.",
-    href: "#",
+    href: "/dashboard/rooms",
   },
   {
     icon: ClipboardList,
