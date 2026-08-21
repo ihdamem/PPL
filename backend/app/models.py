@@ -17,6 +17,10 @@ class User(BaseModel):
     sub: str
     role: Role = Role.USER
 
+    # Profile fields
+    nomor_induk: Optional[str] = None
+    departemen: Optional[str] = None
+    created_at: Optional[datetime] = None
 
 class BookingStatus(str, Enum):
     PENDING = "pending"

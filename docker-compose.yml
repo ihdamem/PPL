@@ -27,12 +27,23 @@ services:
       # Local path: ~/google-login-credentials.json
       # Server path: ~/google-login-credentials.json
       - ~/google-login-credentials.json:/app/credentials/google-login-credentials.json:ro
+      # Persistent SQLite database
+      - siruangan-data:/app/data
     environment:
       - GOOGLE_CREDENTIALS_FILE=/app/credentials/google-login-credentials.json
-      - CORS_ORIGINS=http://localhost:8085
+      - DATABASE_PATH=/app/data/siruangan.db
+      - SECRET_KEY=${SECRET_KEY:-dev-secret-change-me-in-production}
+      - DEBUG=${DEBUG:-false}
+      - ADMIN_EMAILS=${ADMIN_EMAILS:-}
+      - APPROVER_EMAILS=${APPROVER_EMAILS:-}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:8085}
+      - SECURE_COOKIES=${SECURE_COOKIES:-false}
     networks:
       - siruangan-net
 
 networks:
   siruangan-net:
     driver: bridge
+
+volumes:
+  siruangan-data:
