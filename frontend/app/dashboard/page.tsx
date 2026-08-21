@@ -35,6 +35,12 @@ const menuItems = [
     href: "/dashboard/booking/history",
   },
   {
+    icon: User,
+    title: "Profil Saya",
+    desc: "Kelola informasi profil akun.",
+    href: "/dashboard/profile",
+  },
+  {
     icon: ShieldCheck,
     title: "Approval Peminjaman",
     desc: "Tinjau dan setujui/tolak pengajuan peminjaman ruangan.",
