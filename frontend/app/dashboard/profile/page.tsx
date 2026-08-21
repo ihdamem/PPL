@@ -18,10 +18,10 @@ function getRoleLabel(role: string) {
   switch (role) {
     case "admin":
       return { label: "Admin", color: "bg-blue-100 text-blue-700 border-blue-200 dark:bg-blue-500/15 dark:text-blue-400 dark:border-blue-500/30" };
-    case "approver":
-      return { label: "Approver", color: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30" };
+    case "superadmin":
+      return { label: "Superadmin", color: "bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-500/15 dark:text-purple-400 dark:border-purple-500/30" };
     default:
-      return { label: "Customer / Booker", color: "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30" };
+      return { label: "Booker", color: "bg-green-100 text-green-700 border-green-200 dark:bg-green-500/15 dark:text-green-400 dark:border-green-500/30" };
   }
 }
 

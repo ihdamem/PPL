@@ -7,7 +7,7 @@ from pathlib import Path
 from typing import Iterator, Optional
 
 from app.config import settings
-from app.models import Role, User
+from app.models import Role, User, LEGACY_ROLE_MAP
 
 
 DB_PATH = Path(settings.database_path).expanduser()
@@ -41,7 +41,7 @@ def init_db() -> None:
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
                 email TEXT NOT NULL UNIQUE,
                 nama TEXT,
-                role TEXT NOT NULL DEFAULT 'user',
+                role TEXT NOT NULL DEFAULT 'booker',
                 nomor_induk TEXT,
                 departemen TEXT,
                 picture TEXT,
@@ -52,13 +52,25 @@ def init_db() -> None:
         )
 
 
+def _normalize_role(value: str) -> Role:
+    """Map nilai role lama ('user'/'approver') ke role baru bila perlu."""
+
+    if value in LEGACY_ROLE_MAP:
+        return LEGACY_ROLE_MAP[value]
+
+    try:
+        return Role(value)
+    except ValueError:
+        return Role.BOOKER
+
+
 def _row_to_user(row: sqlite3.Row) -> User:
     return User(
         email=row["email"],
         name=row["nama"],
         picture=row["picture"],
         sub=row["sub"],
-        role=Role(row["role"]),
+        role=_normalize_role(row["role"]),
         nomor_induk=row["nomor_induk"],
         departemen=row["departemen"],
         created_at=datetime.fromisoformat(row["created_at"]),
@@ -166,6 +178,33 @@ def update_profile(
                 departemen,
                 sub,
             ),
+        )
+
+        row = connection.execute(
+            "SELECT * FROM users WHERE sub = ?",
+            (sub,),
+        ).fetchone()
+
+    return _row_to_user(row) if row else None
+
+def list_users() -> list[User]:
+    """Daftar seluruh user, terbaru dulu."""
+
+    with get_connection() as connection:
+        rows = connection.execute(
+            "SELECT * FROM users ORDER BY created_at DESC, id DESC"
+        ).fetchall()
+
+    return [_row_to_user(row) for row in rows]
+
+
+def update_user_role(*, sub: str, role: Role) -> Optional[User]:
+    """Ubah role user (dipakai superadmin untuk promosi/demosi admin)."""
+
+    with get_connection() as connection:
+        connection.execute(
+            "UPDATE users SET role = ? WHERE sub = ?",
+            (role.value, sub),
         )
 
         row = connection.execute(

@@ -14,33 +14,24 @@ class Settings(BaseSettings):
     cors_origins: str = "*"
     secure_cookies: bool = False
     database_path: str = "/app/data/siruangan.db"
-    admin_emails: str = ""
-    approver_emails: str = ""
+    superadmin_emails: str = (
+        "primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id"
+    )
 
     @property
     def cors_origins_list(self) -> list[str]:
-        if self.cors_origins == "*":
-            return ["*"]
-        return [
-            origin.strip()
-            for origin in self.cors_origins.split(",")
-            if origin.strip()
-        ]
+        return self._split_csv(self.cors_origins)
 
     @property
-    def admin_email_set(self) -> set[str]:
-        return {
-            email.strip().lower()
-            for email in self.admin_emails.split(",")
-            if email.strip()
-        }
+    def superadmin_email_set(self) -> set[str]:
+        return self._split_csv(self.superadmin_emails)
 
-    @property
-    def approver_email_set(self) -> set[str]:
+    @staticmethod
+    def _split_csv(value: str) -> set[str]:
         return {
-            email.strip().lower()
-            for email in self.approver_emails.split(",")
-            if email.strip()
+            item.strip().lower()
+            for item in value.split(",")
+            if item.strip()
         }
 
 settings = Settings()
