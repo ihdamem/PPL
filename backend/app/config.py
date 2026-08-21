@@ -20,7 +20,12 @@ class Settings(BaseSettings):
 
     @property
     def cors_origins_list(self) -> list[str]:
-        return self._split_csv(self.cors_origins)
+        items = [
+            item.strip()
+            for item in self.cors_origins.split(",")
+            if item.strip()
+        ]
+        return ["*"] if "*" in items else items
 
     @property
     def superadmin_email_set(self) -> set[str]:
