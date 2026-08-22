@@ -180,8 +180,8 @@ Konfigurasi yang diperlukan di **Settings > Secrets and variables > Actions** re
 
 | Secret | Keterangan |
 |--------|------------|
-| `SSH_HOST` | `sshd.meansrev.tech` |
-| `SSH_USER` | user SSH di server, contoh: `webserver-2` |
+| `SSH_HOST` | `mydomain.com` |
+| `SSH_USER` | user SSH di server, contoh: `webser-1` |
 | `SSH_PASSWORD` | password SSH user tersebut |
 | `CF_ACCESS_CLIENT_ID` | Cloudflare Access service token ID (agar cloudflared tidak perlu login interaktif) |
 | `CF_ACCESS_CLIENT_SECRET` | Cloudflare Access service token secret |
@@ -191,8 +191,8 @@ Konfigurasi yang diperlukan di **Settings > Secrets and variables > Actions** re
 Jika ingin deploy dari laptop:
 
 ```bash
-export SSH_USER="webserver-2"
-export SSH_PASSWORD="dimasganteng"
+export SSH_USER="webser-1"
+export SSH_PASSWORD="*****"
 export CF_ACCESS_CLIENT_ID="..."
 export CF_ACCESS_CLIENT_SECRET="..."
 ./scripts/deploy.sh
