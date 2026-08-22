@@ -128,15 +128,43 @@ export default function BookingHistoryPage() {
       </div>
       {selectedBooking && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50" onClick={() => setSelectedBooking(null)}>
-          <div className="relative bg-card p-6 rounded-lg w-full max-w-md" onClick={e => e.stopPropagation()}>
-            <button className="absolute top-2 right-2 text-muted-foreground" onClick={() => setSelectedBooking(null)}>
+          <div className="relative bg-card p-6 rounded-lg w-full max-w-md shadow-lg border border-border" onClick={e => e.stopPropagation()}>
+            <button className="absolute top-4 right-4 text-muted-foreground hover:text-foreground" onClick={() => setSelectedBooking(null)}>
               <X className="size-5" />
             </button>
-            <h2 className="text-xl font-bold mb-4">{selectedBooking.keperluan}</h2>
-            <p className="mb-2"><span className="font-semibold">Status:</span> {selectedBooking.status}</p>
-            <p className="mb-2"><span className="font-semibold">Tanggal:</span> {new Date(selectedBooking.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
-            <p className="mb-2"><span className="font-semibold">Waktu:</span> {selectedBooking.waktu_mulai.slice(0,5)} - {selectedBooking.waktu_selesai.slice(0,5)}</p>
-            <p className="mb-2"><span className="font-semibold">ID:</span> #{selectedBooking.id}</p>
+            <h2 className="text-xl font-bold mb-6 pr-8 text-foreground">{selectedBooking.keperluan}</h2>
+            
+            <div className="space-y-4">
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <span className="text-muted-foreground">Status</span>
+                <span className={`rounded-full border px-2.5 py-0.5 text-xs font-semibold capitalize ${getStatusColor(selectedBooking.status)}`}>
+                  {selectedBooking.status}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <span className="text-muted-foreground">Tanggal</span>
+                <span className="font-medium text-foreground">
+                  {new Date(selectedBooking.tanggal).toLocaleDateString('id-ID', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between border-b border-border pb-3">
+                <span className="text-muted-foreground">Waktu</span>
+                <span className="font-medium text-foreground">
+                  {selectedBooking.waktu_mulai.slice(0,5)} - {selectedBooking.waktu_selesai.slice(0,5)}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between pt-1">
+                <span className="text-muted-foreground">ID Peminjaman</span>
+                <span className="font-medium text-foreground">#{selectedBooking.id}</span>
+              </div>
+            </div>
+            
+            <div className="mt-8 flex justify-end">
+              <Button onClick={() => setSelectedBooking(null)}>Tutup</Button>
+            </div>
           </div>
         </div>
       )}
