@@ -28,3 +28,9 @@ backend/.test-data/
 # Ignore e2e test folder
 e2e
 
+
+# E2E
+e2e/node_modules/
+e2e/.logs/
+e2e/test-results/
+e2e/playwright-report/

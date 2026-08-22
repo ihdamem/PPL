@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
+import { useRoleGuard } from "@/hooks/use-role-guard";
 import { ArrowLeft, CheckCircle, XCircle, Info, MessageSquare } from "lucide-react";
 import Link from "next/link";
 
@@ -19,6 +20,8 @@ type Booking = {
 };
 
 export default function ApprovalDashboardPage() {
+  // Guard: hanya admin/superadmin; booker redirect ke dashboard.
+  const { loading: guardLoading } = useRoleGuard(["admin", "superadmin"]);
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [loading, setLoading] = useState(true);
   const [rejectingId, setRejectingId] = useState<number | null>(null);
@@ -102,7 +105,7 @@ export default function ApprovalDashboardPage() {
           <p className="text-muted-foreground">Tinjau dan berikan keputusan untuk pengajuan peminjaman ruangan.</p>
         </div>
 
-        {loading ? (
+        {loading || guardLoading ? (
           <div className="flex h-64 items-center justify-center rounded-xl border border-dashed border-border bg-card">
             <p className="text-muted-foreground">Memuat data pengajuan...</p>
           </div>

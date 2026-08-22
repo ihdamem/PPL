@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useRoleGuard, type UserRole } from "@/hooks/use-role-guard";
 import {
   ArrowLeft,
   ShieldCheck,
@@ -12,9 +13,7 @@ import {
   RefreshCw,
 } from "lucide-react";
 
-type UserRole = "booker" | "admin" | "superadmin";
-
-type UserProfile = {
+export type UserProfile = {
   email: string;
   name?: string;
   picture?: string;
@@ -52,26 +51,18 @@ function RoleBadge({ role }: { role: UserRole }) {
 
 export default function ManageUsersPage() {
   const router = useRouter();
-  const [currentUser, setCurrentUser] = useState<UserProfile | null>(null);
+  // Guard: hanya superadmin; selain itu redirect ke dashboard.
+  const { user: currentUser, loading: guardLoading } = useRoleGuard(["superadmin"]);
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [busySub, setBusySub] = useState<string | null>(null);
   const [query, setQuery] = useState("");
 
-  const loadData = useCallback(async () => {
+  const loadUsers = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const meRes = await fetch("/api/auth/me", { credentials: "include" });
-      if (!meRes.ok) throw new Error("Silakan login terlebih dahulu");
-      const me: UserProfile = await meRes.json();
-      setCurrentUser(me);
-
-      if (me.role !== "superadmin") {
-        throw new Error("Hanya superadmin yang dapat mengakses halaman ini");
-      }
-
       const usersRes = await fetch("/api/admin/users", { credentials: "include" });
       if (!usersRes.ok) {
         const body = await usersRes.json().catch(() => ({}));
@@ -86,8 +77,10 @@ export default function ManageUsersPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    if (!guardLoading && currentUser) {
+      loadUsers();
+    }
+  }, [guardLoading, currentUser, loadUsers]);
 
   const handleSetRole = async (target: UserProfile, role: "booker" | "admin") => {
     setBusySub(target.sub);
@@ -192,7 +185,7 @@ export default function ManageUsersPage() {
               Jadikan user sebagai admin agar dapat mengelola ruangan dan menyetujui peminjaman.
             </p>
           </div>
-          <Button variant="outline" size="sm" onClick={loadData} disabled={loading}>
+          <Button variant="outline" size="sm" onClick={loadUsers} disabled={loading}>
             <RefreshCw className={`mr-2 size-4 ${loading ? "animate-spin" : ""}`} />
             Muat Ulang
           </Button>
