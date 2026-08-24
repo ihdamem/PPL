@@ -188,9 +188,42 @@ def update_room(room_id: int, payload: RoomUpdate) -> Optional[RoomResponse]:
 
 
 def delete_room(room_id: int) -> bool:
+    """Hapus ruangan berdasarkan ID. Mengembalikan True jika ada baris yang dihapus."""
     with get_connection() as connection:
         cursor = connection.execute(
             "DELETE FROM rooms WHERE id = ?",
             (room_id,),
         )
         return cursor.rowcount > 0
+
+
+# -----------------------------------------------------------------
+# Contoh data ruangan (dummy) – dipakai untuk demo / testing
+# -----------------------------------------------------------------
+fake_rooms_db = [
+    {
+        "id": 1,
+        "name": "Ruang A",
+        "location": "Gedung 1, Lantai 2",
+        "capacity": 30,
+        "facilities": ["Proyektor", "Whiteboard"],
+        "status": "available",
+    },
+    {
+        "id": 2,
+        "name": "Ruang B",
+        "location": "Gedung 2, Lantai 1",
+        "capacity": 20,
+        "facilities": ["TV", "Speaker"],
+        "status": "available",
+    },
+    {
+        "id": 3,
+        "name": "Ruang C",
+        "location": "Gedung 3, Lantai 3",
+        "capacity": 15,
+        "facilities": ["Komputer", "Koneksi Internet"],
+        "status": "available",
+    },
+]
+
