@@ -12,7 +12,7 @@ from app.models import (
     Role,
 )
 from app.auth import require_user
-from app.rooms_db import get_room
+from app.rooms_db import get_room, fake_rooms_db
 from app.audit import record_audit
 from app.notifications import notify_user, notify_role
 
@@ -133,6 +133,62 @@ async def get_pending_bookings(current_user: User = Depends(require_user)):
         )
     pending = [b for b in fake_bookings_db if b.status == BookingStatus.PENDING]
     return pending
+
+
+@router.get("/schedule")
+async def get_schedule(tanggal: str, current_user: User = Depends(require_user)):
+    """Mendapatkan jadwal semua ruangan pada tanggal tertentu."""
+    try:
+        target_date = datetime.strptime(tanggal, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format tanggal tidak valid (YYYY-MM-DD)")
+
+    schedule = []
+    for room in fake_rooms_db:
+        # Cari booking untuk ruangan ini pada tanggal tersebut
+        room_id_val = room["id"] if isinstance(room, dict) else room.id
+        room_name_val = room["name"] if isinstance(room, dict) else room.name
+        room_bookings = [
+            {
+                "waktu_mulai": b.waktu_mulai.strftime("%H:%M"),
+                "waktu_selesai": b.waktu_selesai.strftime("%H:%M"),
+                "status": b.status
+            }
+            for b in fake_bookings_db
+            if b.room_id == room_id_val
+            and b.tanggal == target_date
+            and b.status in (BookingStatus.PENDING, BookingStatus.APPROVED)
+        ]
+        schedule.append({
+            "room_id": room_id_val,
+            "room_name": room_name_val,
+            "bookings": room_bookings
+        })
+    
+    return schedule
+
+@router.get("/check-availability")
+async def check_availability(room_id: int, tanggal: str, current_user: User = Depends(require_user)):
+    """Cek jadwal yang sudah terisi untuk ruangan dan tanggal tertentu."""
+    try:
+        target_date = datetime.strptime(tanggal, "%Y-%m-%d").date()
+    except ValueError:
+        raise HTTPException(status_code=400, detail="Format tanggal tidak valid (YYYY-MM-DD)")
+
+    # Ambil semua booking yang sudah disetujui atau masih pending untuk ruangan tersebut pada tanggal tersebut
+    booked_slots = [
+        {
+            "waktu_mulai": b.waktu_mulai.strftime("%H:%M"),
+            "waktu_selesai": b.waktu_selesai.strftime("%H:%M"),
+            "status": b.status
+        }
+        for b in fake_bookings_db
+        if b.room_id == room_id
+        and b.tanggal == target_date
+        and b.status in (BookingStatus.PENDING, BookingStatus.APPROVED)
+    ]
+    
+    return booked_slots
 
 
 @router.get("/{booking_id}", response_model=BookingResponse)
