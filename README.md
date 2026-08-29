@@ -8,7 +8,17 @@ Sistem ini dirancang untuk mempermudah proses peminjaman ruangan di lingkungan k
 
 ---
 
-## 🚀 Menjalankan Secara Lokal
+## �️ Penetration Test Report
+
+Dokumen laporan uji keamanan terbaru telah disimpan di file berikut:
+
+- [Penetration_Test_Report_pplmmi_meansrev_me_2026-08-28.md](Penetration_Test_Report_pplmmi_meansrev_me_2026-08-28.md)
+
+Laporan ini berisi hasil review keamanan terhadap domain target `https://pplmmi.meansrev.me/` dengan fokus pada aspek infrastruktur, header keamanan, konfigurasi TLS, serta permukaan autentikasi dan API. Temuan utama terdokumentasikan dalam bentuk executive summary, daftar issue, dan roadmap mitigasi yang dapat digunakan sebagai referensi untuk perbaikan keamanan berikutnya.
+
+---
+
+## �🚀 Menjalankan Secara Lokal
 
 Pastikan file `~/google-login-credentials.json` sudah ada. Contoh format:
 
