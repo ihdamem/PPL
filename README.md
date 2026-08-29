@@ -133,7 +133,7 @@ Admin tambahan ditunjuk oleh **superadmin** lewat halaman **Kelola User** (`/app
 Default superadmin (hardcoded di `docker-compose.yml`, bisa dioverride via env):
 
 ```
-SUPERADMIN_EMAILS=primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id
+SUPERADMIN_EMAILS=primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id,hanan.f.r@mail.ugm.ac.id
 ```
 
 Semua email dinormalisasi ke lowercase sebelum dibandingkan. Gunakan domain `@mail.ugm.ac.id` (email mahasiswa UGM).

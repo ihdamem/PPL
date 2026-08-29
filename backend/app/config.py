@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     secure_cookies: bool = False
     database_path: str = "/app/data/siruangan.db"
     superadmin_emails: str = (
-        "primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id"
+        "primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id,hanan.f.r@mail.ugm.ac.id"
     )
 
     @property
