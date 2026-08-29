@@ -44,6 +44,9 @@ class TestRoleForEmail:
     def test_dimas_is_superadmin(self):
         assert role_for_email("dimasihdammaulana@mail.ugm.ac.id") == Role.SUPERADMIN
 
+    def test_hanan_is_superadmin(self):
+        assert role_for_email("hanan.f.r@mail.ugm.ac.id") == Role.SUPERADMIN
+
     def test_superadmin_case_insensitive(self):
         assert (
             role_for_email("PrimaAdiPradana@Mail.Ugm.Ac.Id") == Role.SUPERADMIN

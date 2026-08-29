@@ -19,7 +19,7 @@ os.environ["DATABASE_PATH"] = str(TEST_DB_PATH)
 os.environ["DEBUG"] = "true"  # mock-login hanya aktif saat debug
 os.environ["SECRET_KEY"] = "test-secret-key"
 os.environ["SUPERADMIN_EMAILS"] = (
-    "primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id"
+    "primaadipradana@mail.ugm.ac.id,dimasihdammaulana@mail.ugm.ac.id,hanan.f.r@mail.ugm.ac.id"
 )
 
 import pytest  # noqa: E402
